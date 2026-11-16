@@ -471,7 +471,7 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611161936';
+const APP_VERSION='202611161938';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -634,7 +634,7 @@ function camError(t){ const c=$('#camBox'); if(c){ c.className='cam err'; c.inne
 async function iniciarCamara(){
   const video=$('#video'); if(!video) return;
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ camError('Este navegador no deja usar la cámara en vivo. Usá “Sacar foto”.'); return; }
-  try{ camStream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}}}); }
+  try{ camStream=await pedirCamara(1920,1080); }
   catch(e){ camError('No pude abrir la cámara. Revisá que el navegador tenga permiso, o usá “Sacar foto”.'); return; }
   if(V.view!=='camara'){ detenerCamara(); return; }
   video.srcObject=camStream; video.setAttribute('playsinline',''); video.muted=true;
@@ -668,7 +668,7 @@ async function iniciarCamara(){
 async function iniciarFotoCam(){
   const video=$('#video'); if(!video) return;
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ camError('Este navegador no deja usar la cámara. Elegí la foto de la galería.'); return; }
-  try{ camStream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1440}}}); }
+  try{ camStream=await pedirCamara(1920,1440); }
   catch(e){ camError('No pude abrir la cámara. Revisá el permiso o elegí la foto de la galería.'); return; }
   if(V.view!=='fotoCam'){ detenerCamara(); return; }
   video.srcObject=camStream; video.setAttribute('playsinline',''); video.muted=true;
@@ -717,7 +717,16 @@ async function disparar(){
   detenerCamara(); back();
   fotoElegida(V,blob);
 }
-function detenerCamara(){ camViva=false; clearTimeout(camTimer); camTimer=null; if(camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; } }
+// La cámara no se apaga enseguida al salir del escáner: queda reservada 2 minutos. Así, en el iPhone
+// (app en la pantalla de inicio) no vuelve a pedir permiso cada vez que abrís el escáner en la misma sesión.
+let camReserva=null, camReservaT=null;
+async function pedirCamara(w,h){
+  if(camReserva&&camReserva.getVideoTracks().some(t=>t.readyState==='live')){ const st=camReserva; camReserva=null; clearTimeout(camReservaT);
+    try{ await st.getVideoTracks()[0].applyConstraints({facingMode:{ideal:'environment'},width:{ideal:w},height:{ideal:h}}); }catch(e){} return st; }
+  camReserva=null; return navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:w},height:{ideal:h}}}); }
+function soltarCamara(){ clearTimeout(camReservaT); if(camReserva){ camReserva.getTracks().forEach(t=>t.stop()); camReserva=null; } }
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) soltarCamara(); });
+function detenerCamara(){ camViva=false; clearTimeout(camTimer); camTimer=null; if(camStream){ document.querySelectorAll('video').forEach(v=>{ if(v.srcObject===camStream) v.srcObject=null; }); soltarCamara(); camReserva=camStream; camStream=null; camReservaT=setTimeout(soltarCamara,120000); } }
 document.addEventListener('visibilitychange',()=>{ const cv=V.view==='camara'||V.view==='fotoCam'; if(document.hidden&&cv) detenerCamara(); else if(!document.hidden&&cv&&!camViva){ render(); (V.view==='camara'?iniciarCamara:iniciarFotoCam)(); } });
 async function alElegirFoto(e){
   const file=e.target.files&&e.target.files[0]; e.target.value=''; if(!file) return;
@@ -1390,7 +1399,7 @@ let ultimaLectura={t:'',at:0};
 async function iniciarLectorMov(){
   const video=$('#video'); if(!video) return; detenerCamara();
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ camError('Este navegador no deja usar la cámara. Agregá los productos con el buscador.'); return; }
-  try{ camStream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}}); }
+  try{ camStream=await pedirCamara(1280,720); }
   catch(e){ camError('No pude abrir la cámara. Podés agregar los productos con el buscador.'); return; }
   if(V.view!=='mov'){ detenerCamara(); return; }
   video.srcObject=camStream; video.setAttribute('playsinline',''); video.muted=true; try{ await video.play(); }catch(e){}
