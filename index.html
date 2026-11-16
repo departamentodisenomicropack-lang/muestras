@@ -403,7 +403,7 @@ body.escaneo .toast{background:#fff;color:#000}
 .sw.chau{transition:height .3s cubic-bezier(.2,0,0,1),opacity .3s,margin .3s;opacity:0}
 
 /* Mazo en profundidad (depth flow) para recorrer los productos de una caja */
-.df{position:relative;height:236px;margin:4px -16px 84px;perspective:1000px;perspective-origin:50% 0%;touch-action:none;-webkit-user-select:none;user-select:none;overflow:hidden;cursor:grab}
+.df{position:relative;height:226px;margin:8px -16px 0;perspective:1000px;perspective-origin:50% 0%;touch-action:none;-webkit-user-select:none;user-select:none;overflow:hidden;cursor:grab}
 .df.arrastra{cursor:grabbing}
 .df-c{position:absolute;left:20px;right:20px;top:78px;height:100px;border-radius:24px;background:#fff;border:0;padding:10px 14px 10px 10px;display:flex;align-items:center;gap:14px;transform-origin:50% 0;will-change:transform,opacity,filter;box-shadow:0 1px 2px rgb(0 0 0/.06),0 10px 28px rgb(0 0 0/.12);cursor:pointer;color:#000;font:inherit;text-align:left}
 .df-c .im{flex:none;width:80px;height:80px;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1px #ececec;display:flex;align-items:center;justify-content:center;padding:6px;overflow:hidden}
@@ -411,6 +411,8 @@ body.escaneo .toast{background:#fff;color:#000}
 .df-c .pie{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .df-c .pie .t{font-size:16px;font-weight:800;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .df-c .pie .s{font-size:13.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.df-acts{position:absolute;left:20px;right:20px;top:78px;height:100px;display:flex;justify-content:flex-end;border-radius:24px;overflow:hidden;opacity:var(--p,0);z-index:995}
+.df-acts .sw-b{min-width:92px;transform:scale(calc(.82 + .18*var(--p,0)));transform-origin:right center}
 .df-c .q{flex:none;min-width:32px;height:32px;padding:0 10px;border-radius:999px;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;font-variant-numeric:tabular-nums}
 .revela .grp .sw{animation:filaEntra .55s var(--snappy) both}
 .revela .grp .sw:nth-child(2){animation-delay:35ms}.revela .grp .sw:nth-child(3){animation-delay:70ms}.revela .grp .sw:nth-child(4){animation-delay:105ms}.revela .grp .sw:nth-child(5){animation-delay:140ms}.revela .grp .sw:nth-child(6){animation-delay:175ms}.revela .grp .sw:nth-child(7){animation-delay:210ms}.revela .grp .sw:nth-child(8){animation-delay:245ms}.revela .grp .sw:nth-child(9){animation-delay:280ms}.revela .grp .sw:nth-child(10){animation-delay:315ms}.revela .grp .sw:nth-child(11){animation-delay:350ms}.revela .grp .sw:nth-child(12){animation-delay:385ms}
@@ -471,7 +473,7 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611161947';
+const APP_VERSION='202611161952';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -1000,16 +1002,15 @@ escanear:{ html(){
 /* ---------- Caja ---------- */
 caja:{ html(){
   const c=S.cajas.get(V.p.id); if(!c) return `${cabecera()}<div class="empty"><b>Esta caja ya no existe</b></div>`;
-  const items=stockEn(V.p.id); const unid=items.reduce((a,s)=>a+s.cant,0); const nprod=new Set(items.map(s=>s.codigo)).size; const vista=items.length>1?(V.f.vista||'fichas'):'lista';
+  const items=stockEn(V.p.id); const unid=items.reduce((a,s)=>a+s.cant,0); const nprod=new Set(items.map(s=>s.codigo)).size; 
   const grupos={}; items.forEach(s=>{ const p=S.productos.get(s.codigo)||{}; const k=[p.cliente,p.proyecto].filter(Boolean).join(' · ')||'Sin proyecto'; (grupos[k]=grupos[k]||[]).push(s); });
   return `${cabecera(iconBtn(`data-go="etiqueta" data-id="${esc(V.p.id)}"`,'tag','Etiqueta')+iconBtn(`data-go="nuevaCaja" data-id="${esc(V.p.id)}"`,'edit','Editar caja'))}
   <p class="kicker">${esc(c.lugar||'Sin lugar')}</p><h1 class="md">${esc(c.nombre)}</h1>
   ${items.length?`<p class="stat-line"><b>${nprod}</b> ${nprod===1?'producto':'productos'}, <b>${roll('caja-'+V.p.id,unid)}</b> ${unid===1?'unidad':'unidades'}</p>
-  <p class="help" style="margin-top:6px">${vista==='fichas'?'Bajá el dedo para pasar a la siguiente; subilo para volver. Tocá la de adelante para abrirla.':'Deslizá un producto a la izquierda para moverlo o borrarlo.'}</p>
+  <p class="help" style="margin-top:6px">${items.length>1?'Bajá el dedo para pasar a la siguiente ficha. Deslizá a la izquierda para moverla o borrarla.':'Deslizá el producto a la izquierda para moverlo o borrarlo.'}</p>
   <div class="acts3">${[['sacar','Sacar','out'],['mover','Mover','arrow'],['devolver','Devolver','user']].map(([k,l,ic])=>`<button class="accion" data-mov="${k}" data-desde="${esc(V.p.id)}"><span class="bub">${ico(ic,18,'stroke:#fff')}</span>${l}</button>`).join('')}</div>`:''}
-  ${items.length>1?`<div class="seg" role="tablist" aria-label="Cómo ver los productos" style="margin-top:16px">${[['fichas','Fichero'],['lista','Lista']].map(([k,l])=>`<button role="tab" data-cvista="${k}" aria-selected="${vista===k}">${l}</button>`).join('')}</div>`:''}
-  ${items.length&&vista==='fichas'?mazoHTML(items.sort((a,b)=>prodNom(a.codigo).localeCompare(prodNom(b.codigo),'es'))):''}
-  ${items.length&&vista!=='fichas'?`<div class="grp" style="margin-top:14px">${items.sort((a,b)=>prodNom(a.codigo).localeCompare(prodNom(b.codigo),'es')).map(s=>filaProd(s,esc(S.productos.get(s.codigo)?.marca||''))).join('')}</div>`:''}
+  ${items.length>1?mazoHTML(items.sort((a,b)=>prodNom(a.codigo).localeCompare(prodNom(b.codigo),'es'))):''}
+  ${items.length?`${items.length>1?`<div class="sec"><h2>Todos los productos</h2><span class="m">${items.length}</span></div>`:''}<div class="grp" style="margin-top:${items.length>1?8:14}px">${items.sort((a,b)=>prodNom(a.codigo).localeCompare(prodNom(b.codigo),'es')).map(s=>filaProd(s,esc(S.productos.get(s.codigo)?.marca||''))).join('')}</div>`:''}
   ${items.length?'':`<div class="empty"><b>Está vacía</b><p>Tocá “Agregar acá” y escaneá los productos que metas en esta caja.</p></div>`}
   <button type="button" class="fab" data-mov="ingresar" data-caja="${esc(V.p.id)}"><span class="shape">${shape(GALLETA,44,'#a35e47')}<svg class="ico" width="20" height="20" viewBox="0 0 24 24"><path d="${I.scan}"/></svg></span>Agregar acá</button>`;
 }},
@@ -1694,7 +1695,7 @@ function toastAccion(m,txt,fn){ const t=$('#toast'); t.innerHTML=`<span>${esc(m)
 /* ============ Mazo en profundidad: las fichas que vienen esperan atrás, las que pasaron caen hacia adelante ============ */
 function mazoHTML(items){
   return `<div class="df" id="df" role="listbox" aria-label="Productos de la caja">${items.map((s,i)=>{ const p=S.productos.get(s.codigo)||{};
-    return `<button type="button" class="df-c" data-i="${i}" data-codigo="${esc(s.codigo)}" role="option" aria-label="${esc(p.nombre||s.codigo)}, ${s.cant} ${s.cant===1?'unidad':'unidades'}"><span class="im" data-flip="t-${esc(s.codigo)}">${p.foto?`<img src="${fotoUrl(p.foto)}" alt="" loading="${i<5?'eager':'lazy'}" draggable="false">`:ico('prod',56,'stroke:var(--ink-3);stroke-width:1.4')}</span><span class="pie"><span class="t">${esc(p.nombre||s.codigo)}</span><span class="s">${esc(p.marca||unidades(s.cant))}</span></span><b class="q">${s.cant}</b></button>`; }).join('')}<span class="df-pos" id="dfPos" aria-live="polite"></span></div>`; }
+    return `<button type="button" class="df-c" data-i="${i}" data-codigo="${esc(s.codigo)}" role="option" aria-label="${esc(p.nombre||s.codigo)}, ${s.cant} ${s.cant===1?'unidad':'unidades'}"><span class="im" data-flip="t-${esc(s.codigo)}">${p.foto?`<img src="${fotoUrl(p.foto)}" alt="" loading="${i<5?'eager':'lazy'}" draggable="false">`:ico('prod',56,'stroke:var(--ink-3);stroke-width:1.4')}</span><span class="pie"><span class="t">${esc(p.nombre||s.codigo)}</span><span class="s">${esc(p.marca||unidades(s.cant))}</span></span><b class="q">${s.cant}</b></button>`; }).join('')}<div class="df-acts" id="dfActs"><button type="button" class="sw-b gris" data-dfact="mover">Mover</button><button type="button" class="sw-b rojo" data-dfact="borrar">Borrar</button></div><span class="df-pos" id="dfPos" aria-live="polite"></span></div>`; }
 function iniciarMazo(){
   const df=$('#df'); if(!df||df._ok) return; df._ok=1;
   const cards=[...df.querySelectorAll('.df-c')], n=cards.length, f=V.f;
@@ -1712,16 +1713,30 @@ function iniciarMazo(){
     const paso=now=>{ const dt=Math.min(.032,(now-last)/1000); last=now; const a=-200*(p-dest)-28*vel; vel+=a*dt; p+=vel*dt;
       if(Math.abs(p-dest)<.001&&Math.abs(vel)<.01){ p=dest; vel=0; pintar(); return; } pintar(); raf=requestAnimationFrame(paso); };
     raf=requestAnimationFrame(paso); };
+  // deslizar a la izquierda la ficha de adelante: Mover / Borrar (borrar pide confirmación)
+  const acts=$('#dfActs'); let sx=0; const AW=184;
+  const frente=()=>cards[Math.max(0,Math.min(n-1,Math.round(p)))];
+  const ponerX=(x,anim)=>{ sx=x; const c=frente(); c.style.transition=anim?'transform .45s var(--spring)':''; c.style.transform=x?`translateX(${x}px)`:'translateY(0px) scale(1)'; df.style.setProperty('--p',Math.max(0,Math.min(1,-x/AW)).toFixed(3)); if(anim) df.style.setProperty('--p',x?1:0); if(anim&&!x) setTimeout(()=>{ c.style.transition=''; },460); };
+  const cerrarSw=()=>{ if(sx) ponerX(0,true); };
+  const hacer=que=>{ const c=frente(); cerrarSw(); accionCaja(c.dataset.codigo,V.p.id,que); };
+  acts.addEventListener('pointerdown',e=>e.stopPropagation());
+  acts.addEventListener('click',e=>{ const b=e.target.closest('[data-dfact]'); if(b){ e.preventDefault(); e.stopPropagation(); hacer(b.dataset.dfact); } });
   let drag=null;
-  df.addEventListener('pointerdown',e=>{ if(e.button>0) return; cancelAnimationFrame(raf); drag={y0:e.clientY,p0:p,mov:false,h:[[e.timeStamp,p]],id:e.pointerId,card:e.target.closest('.df-c')}; });
-  df.addEventListener('pointermove',e=>{ if(!drag||e.pointerId!==drag.id) return; const dy=e.clientY-drag.y0; if(!drag.mov){ if(Math.abs(dy)<6) return; drag.mov=true; df.classList.add('arrastra'); try{ df.setPointerCapture(drag.id); }catch(_){} }
+  df.addEventListener('pointerdown',e=>{ if(e.button>0) return; cancelAnimationFrame(raf); drag={x0:e.clientX,y0:e.clientY,p0:p,s0:sx,mov:false,eje:'',h:[[e.timeStamp,p]],hx:[[e.timeStamp,sx]],id:e.pointerId,card:e.target.closest('.df-c')}; });
+  df.addEventListener('pointermove',e=>{ if(!drag||e.pointerId!==drag.id) return; const dy=e.clientY-drag.y0, dx=e.clientX-drag.x0;
+    if(!drag.mov){ if(Math.abs(dx)<7&&Math.abs(dy)<7) return; drag.mov=true; drag.eje=Math.abs(dx)>Math.abs(dy)&&drag.card===frente()?'x':'y'; if(drag.eje==='y'&&sx) cerrarSw(); df.classList.add('arrastra'); try{ df.setPointerCapture(drag.id); }catch(_){} }
+    if(drag.eje==='x'){ let x=drag.s0+dx; if(x>0) x*=.15; const w=df.offsetWidth; if(x<-w) x=-w; ponerX(x,false); drag.hx.push([e.timeStamp,x]); if(drag.hx.length>6) drag.hx.shift(); return; }
     let np=drag.p0+dy/100; /* bajar el dedo = ir más profundo (la de adelante cae con el dedo) */ if(np<0) np=np*.3; if(np>n-1) np=n-1+(np-(n-1))*.3; p=np; drag.h.push([e.timeStamp,p]); if(drag.h.length>6) drag.h.shift(); pintar(); });
   const fin=e=>{ if(!drag||e.pointerId!==drag.id) return; const d=drag; drag=null; df.classList.remove('arrastra');
-    if(!d.mov){ if(d.card){ const i=+d.card.dataset.i; if(i===Math.round(p)) go('producto',{codigo:d.card.dataset.codigo}); else { vel=0; ir(i); } } return; }
+    if(d.eje==='x'){ const h=d.hx, v=h.length>1?(h[h.length-1][1]-h[0][1])/Math.max(1,h[h.length-1][0]-h[0][0]):0, w=df.offsetWidth-40;
+      if(sx<-w*.6||(v<-1.2&&sx<-AW*.5)){ ponerX(-w,true); vibrar(15); setTimeout(()=>hacer('borrar'),140); return; }
+      if(v>.3) { ponerX(0,true); return; }
+      if(sx<-AW*.45||(v<-.35&&sx<-20)) ponerX(-AW,true); else ponerX(0,true); return; }
+    if(!d.mov){ if(sx){ cerrarSw(); return; } if(d.card){ const i=+d.card.dataset.i; if(i===Math.round(p)) go('producto',{codigo:d.card.dataset.codigo}); else { vel=0; ir(i); } } return; }
     const h=d.h, v=h.length>1?(h[h.length-1][1]-h[0][1])/Math.max(1,h[h.length-1][0]-h[0][0])*1000:0; // fichas por segundo
     vel=v; ir(Math.round(p+v*.18)); };
   df.addEventListener('pointerup',fin); df.addEventListener('pointercancel',fin);
-  df.addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); },true);
+  df.addEventListener('click',e=>{ if(e.target.closest('#dfActs')) return; e.preventDefault(); e.stopPropagation(); },true);
   let wt=null; df.addEventListener('wheel',e=>{ e.preventDefault(); cancelAnimationFrame(raf); p=Math.max(-.3,Math.min(n-.7,p+e.deltaY/260)); pintar(); clearTimeout(wt); wt=setTimeout(()=>{ vel=0; ir(Math.round(p)); },110); },{passive:false});
   df.addEventListener('keydown',e=>{ if(e.key==='ArrowDown'||e.key==='ArrowRight'){ e.preventDefault(); ir(Math.round(p)+1); } if(e.key==='ArrowUp'||e.key==='ArrowLeft'){ e.preventDefault(); ir(Math.round(p)-1); } });
   // entrada: el mazo se acomoda desde atrás
@@ -1956,12 +1971,15 @@ function chauFila(sw,luego){ sw.style.height=sw.offsetHeight+'px'; void sw.offse
 function accionSw(sw,que){ const c=sw.dataset.codigo, tipo=sw.dataset.sw;
   const volver=()=>{ sw.classList.remove('abierto'); sw.querySelector('.sw-fr').style.transform=''; };
   if(tipo==='apartado'){ chauFila(sw,()=>{ quitarApartado(c,sw.dataset.caja); render(); toast('Código borrado de la lista'); }); return; }
-  if(tipo==='caja'){ volver(); const caja=sw.dataset.caja;
+  if(tipo==='caja'){ volver(); accionCaja(c,sw.dataset.caja,que); return; }
+  accionSwResto(sw,que,c); }
+function accionCaja(c,caja,que){
     if(que==='mover'){ go('producto',{codigo:c}); V.f.hoja={tipo:'mover',cant:1,desde:caja}; render(); return; }
     const x=stockDe(c).find(y=>y.caja===caja); if(!x) return; const p=S.productos.get(c)||{}, quedan=totalDe(c)-x.cant;
     V.f._borrar={codigo:c,caja,cant:x.cant};
     overlay(`<b style="font-size:22px">¿Borrar de ${esc(cajaNom(caja))}?</b><p style="margin:10px 0 0;color:var(--ink-2)">${esc(p.nombre||c)}: se descarta${x.cant===1?' la unidad':'n las '+x.cant+' unidades'} de esta caja.${quedan?` Quedan ${unidades(quedan)} en otras cajas.`:' La ficha queda en el historial.'}</p>
-     <div class="btns" style="margin-top:18px"><button class="btn" data-act="cancelarBorrar">Cancelar</button><button class="btn" style="background:var(--red);color:#fff" data-act="confirmarBorrar">Borrar</button></div>`); return; }
+     <div class="btns" style="margin-top:18px"><button class="btn" data-act="cancelarBorrar">Cancelar</button><button class="btn" style="background:var(--red);color:#fff" data-act="confirmarBorrar">Borrar</button></div>`); }
+function accionSwResto(sw,que,c){ const tipo=sw.dataset.sw; const volver=()=>{ sw.classList.remove('abierto'); sw.querySelector('.sw-fr').style.transform=''; };
   if(que==='ignorar'){ chauFila(sw,()=>{ setOcultos([...new Set([...ocultos(),c])]); render(); toastAccion('No te lo vuelvo a pedir','Deshacer',()=>{ setOcultos(ocultos().filter(x=>x!==c)); render(); }); }); return; }
   const st=stockDe(c), u=st.reduce((a,x)=>a+x.cant,0), p=S.productos.get(c)||{};
   V.f._borrar=c;
