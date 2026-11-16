@@ -441,17 +441,20 @@ body.escaneo .toast{background:#fff;color:#000}
 .caja-esc .cubo{position:absolute}
 
 /* Cajas vistas desde arriba: cerradas, con solapas y cinta; al tocar se abren y la cámara entra */
-.cajas-top{display:flex;flex-direction:column;gap:12px;margin-top:12px}
-.ctop{position:relative;display:block;width:100%;height:118px;border:0;padding:0;border-radius:14px;background:#6e4f2c;cursor:pointer;perspective:700px;color:#2a1d12;font:inherit;text-align:left;box-shadow:0 1px 1px rgb(0 0 0/.08),0 8px 18px rgb(90 60 25/.20);transition:transform .25s var(--spring)}
-.ctop:active{transform:scale(.98)}
+.cajas-top{display:flex;flex-direction:column;gap:44px;margin-top:-4px;padding-top:0;padding-bottom:40px;perspective:700px;perspective-origin:50% 10%}
+.ctop{position:relative;display:block;width:100%;height:124px;border:0;padding:0;border-radius:12px;background:#6e4f2c;cursor:pointer;color:#2a1d12;font:inherit;text-align:left;transform-style:preserve-3d;transform-origin:50% 100%;transform:rotateX(44deg);margin-bottom:0;box-shadow:0 24px 30px -12px rgb(90 60 25/.35);transition:transform .35s var(--spring)}
+.ctop:active{transform:rotateX(44deg) translateZ(-6px)}
+.ctop .pared{position:absolute;left:0;right:0;top:100%;height:46px;transform-origin:50% 0;transform:rotateX(-90deg);background:linear-gradient(#b48b55,#a07a47);border-radius:0 0 8px 8px;box-shadow:inset 0 2px 0 rgb(255 255 255/.12)}
+.ctop .pared::before{content:"";position:absolute;left:18px;top:9px;width:42px;height:4px;border-radius:2px;background:rgb(60 40 20/.25)}
+.ctop .pared::after{content:"";position:absolute;right:18px;top:9px;width:14px;height:14px;border-radius:50%;box-shadow:0 0 0 2px rgb(60 40 20/.22)}
 .ctop .dentro{position:absolute;inset:7px;border-radius:9px;background:#8a643a;box-shadow:inset 0 6px 14px rgb(0 0 0/.35);overflow:hidden}
 .ctop .dentro i{position:absolute;border-radius:8px;background:#fff;box-shadow:0 3px 8px rgb(0 0 0/.3)}
 .ctop .dentro i:nth-child(1){left:20%;right:24%;top:10%;bottom:30%;transform:rotate(-3deg);background:#efe9e0}.ctop .dentro i:nth-child(2){left:26%;right:18%;top:16%;bottom:24%;transform:rotate(2deg);background:#f6f2ec}.ctop .dentro i:nth-child(3){left:23%;right:21%;top:22%;bottom:16%}
 .ctop .ala{position:absolute;left:0;right:0;height:50%;transform-style:preserve-3d;transition:transform .6s var(--spring)}
 .ctop .ala>*{transition:opacity .15s}.ctop.abierta .ala>*{opacity:0}
 .ctop.abierta .ala{filter:brightness(.93)}
-.ctop .ala.a{top:0;border-radius:14px 14px 0 0;transform-origin:50% 0;background:linear-gradient(170deg,#d6ae76,#c99f66)}
-.ctop .ala.b{bottom:0;border-radius:0 0 14px 14px;transform-origin:50% 100%;background:linear-gradient(170deg,#c99f66,#c0955c)}
+.ctop .ala.a{top:0;border-radius:12px 12px 0 0;transform-origin:50% 0;background:linear-gradient(170deg,#d6ae76,#c99f66)}
+.ctop .ala.b{bottom:0;border-radius:0 0 12px 12px;transform-origin:50% 100%;background:linear-gradient(170deg,#c99f66,#c0955c)}
 .ctop .ala.a::after,.ctop .ala.b::after{content:"";position:absolute;left:0;right:0;height:10px;background:rgb(240 214 165/.55)}
 .ctop .ala.a::after{bottom:0;box-shadow:inset 0 1px 0 rgb(255 255 255/.3)}.ctop .ala.b::after{top:0;box-shadow:inset 0 -1px 0 rgb(120 85 45/.25)}
 .ctop .ala.b::before{content:"";position:absolute;left:0;right:0;top:-1px;height:1.5px;background:rgb(110 78 40/.55);z-index:1}
@@ -461,7 +464,9 @@ body.escaneo .toast{background:#fff;color:#000}
 .ctop .uni>b{font-size:22px;font-weight:900;font-stretch:125%;line-height:1}.ctop .uni>span{font-size:12px;font-weight:700;color:#5a3d22}
 .ctop .sello{position:absolute;right:16px;top:12px;width:26px;height:26px;opacity:.5}
 .ctop.abierta .ala.a{transform:rotateX(150deg)}.ctop.abierta .ala.b{transform:rotateX(-150deg)}
-.ctop-ov{position:fixed;z-index:70;margin:0;pointer-events:none;transform-origin:50% 50%}
+.ctop-esc{position:fixed;z-index:70;pointer-events:none;perspective:700px;perspective-origin:50% 10%;transform-origin:50% 50%}
+.ctop-esc .ctop{position:absolute;inset:0;margin:0;transition:transform .55s var(--spring)}
+.ctop-esc .ctop.abierta{transform:rotateX(0deg)}
 .ctop-blanco{position:fixed;inset:0;z-index:71;background:#fff;pointer-events:none;opacity:0}
 /* ===== Motion (sistema del prototipo) ===== */
 .ghost{position:fixed;z-index:70;pointer-events:none;will-change:left,top,width,height}
@@ -518,7 +523,7 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611162031';
+const APP_VERSION='202611162040';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -1794,22 +1799,22 @@ function cubo(W,H,D,{nombre='',cartas=0,id=''}={}){
 /* ============ Caja vista desde arriba: tocar = se abre y la cámara se mete adentro ============ */
 function cajaArriba(c){ const u=stockEn(c.id).reduce((a,s)=>a+s.cant,0);
   return `<button type="button" class="ctop" data-go="caja" data-id="${esc(c.id)}" aria-label="${esc(c.nombre)}, ${esc(c.lugar||'sin lugar')}, ${u} ${u===1?'unidad':'unidades'}">
-   <span class="dentro" aria-hidden="true"><i></i><i></i><i></i></span>
+   <span class="pared" aria-hidden="true"></span><span class="dentro" aria-hidden="true"><i></i><i></i><i></i></span>
    <span class="ala a" aria-hidden="true"><svg class="sello" viewBox="0 0 100 100"><path d="${GALLETA}" fill="#7a5230"/></svg><span class="nom">${esc(c.nombre)}</span></span>
    <span class="ala b" aria-hidden="true"><span class="lug">${esc(c.lugar||'Sin lugar')}</span><span class="uni"><b>${roll('caja-'+c.id,u)}</b><span>${u===1?'unidad':'unidades'}</span></span></span></button>`; }
 function abrirCaja(btn,luego){
   if(RM||morphando){ luego(); return; } morphando=true;
-  const r=btn.getBoundingClientRect(), ov=btn.cloneNode(true); ov.classList.add('ctop-ov'); ov.removeAttribute('data-go');
-  Object.assign(ov.style,{left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px'}); document.body.appendChild(ov);
+  const t0=btn.style.transform; btn.style.transition='none'; btn.style.transform='none'; const r=btn.getBoundingClientRect(); btn.style.transform=t0; void btn.offsetWidth; btn.style.transition='';
+  const esc_=document.createElement('div'); esc_.className='ctop-esc'; Object.assign(esc_.style,{left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px'});
+  const ov=btn.cloneNode(true); ov.removeAttribute('data-go'); esc_.appendChild(ov); document.body.appendChild(esc_);
   const bl=document.createElement('div'); bl.className='ctop-blanco'; document.body.appendChild(bl);
   btn.style.visibility='hidden';
-  requestAnimationFrame(()=>{ ov.classList.add('abierta'); vibrar(8); });
-  const D=1050;
-  // la cámara entra: la caja crece hasta que su interior llena (y pasa) la pantalla
-  const s=Math.max(innerWidth/(r.width-14),innerHeight/(r.height-14))*1.35, dx=innerWidth/2-(r.left+r.width/2), dy=innerHeight/2-(r.top+r.height/2);
-  ov.animate([{transform:'none',easing:'cubic-bezier(.6,0,.25,1)'},{transform:'none',offset:.42,easing:'cubic-bezier(.6,0,.25,1)'},{transform:`translate(${dx}px,${dy+r.height*.04*s}px) scale(${s})`}],{duration:D,fill:'forwards'});
-  bl.animate([{opacity:0},{opacity:0,offset:.72},{opacity:1}],{duration:D,easing:'ease-in',fill:'forwards'}).finished.then(()=>{
-    luego(); btn.style.visibility=''; ov.remove();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ ov.classList.add('abierta'); vibrar(8); }));
+  // la caja se endereza hacia vos y abre las solapas; después la cámara se mete en la ficha del centro
+  const D=1150, s=Math.max(innerWidth/(r.width-14),innerHeight/(r.height-14))*1.35, dx=innerWidth/2-(r.left+r.width/2), dy=innerHeight/2-(r.top+r.height/2);
+  esc_.animate([{transform:'none',easing:'cubic-bezier(.6,0,.25,1)'},{transform:'none',offset:.45,easing:'cubic-bezier(.6,0,.25,1)'},{transform:`translate(${dx}px,${dy+r.height*.04*s}px) scale(${s})`}],{duration:D,fill:'forwards'});
+  bl.animate([{opacity:0},{opacity:0,offset:.74},{opacity:1}],{duration:D,easing:'ease-in',fill:'forwards'}).finished.then(()=>{
+    luego(); btn.style.visibility=''; esc_.remove();
     bl.animate([{opacity:1},{opacity:0}],{duration:260,easing:'ease-out',fill:'forwards'}).finished.then(()=>bl.remove()); morphando=false; }); }
 function mazoHTML(items){
   return `<div class="df" id="df" role="listbox" aria-label="Productos de la caja">${items.map((s,i)=>{ const p=S.productos.get(s.codigo)||{};
