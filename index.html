@@ -403,15 +403,15 @@ body.escaneo .toast{background:#fff;color:#000}
 .sw.chau{transition:height .3s cubic-bezier(.2,0,0,1),opacity .3s,margin .3s;opacity:0}
 
 /* Mazo en profundidad (depth flow) para recorrer los productos de una caja */
-.df{position:relative;height:372px;margin:4px -16px 84px;perspective:1000px;perspective-origin:50% 0%;touch-action:none;-webkit-user-select:none;user-select:none;overflow:hidden;cursor:grab}
+.df{position:relative;height:236px;margin:4px -16px 84px;perspective:1000px;perspective-origin:50% 0%;touch-action:none;-webkit-user-select:none;user-select:none;overflow:hidden;cursor:grab}
 .df.arrastra{cursor:grabbing}
-.df-c{position:absolute;left:50%;top:56px;width:292px;height:300px;margin-left:-146px;border-radius:28px;background:#fff;border:0;padding:0;overflow:hidden;display:flex;flex-direction:column;transform-origin:50% 0;will-change:transform,opacity,filter;box-shadow:0 1px 2px rgb(0 0 0/.06),0 10px 30px rgb(0 0 0/.12);cursor:pointer;color:#000;font:inherit;text-align:left}
-.df-c .im{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:14px 18px 6px;background:#fff}
-.df-c .im img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
-.df-c .pie{display:flex;flex-direction:column;gap:3px;padding:10px 18px 16px}
-.df-c .pie .t{font-size:17px;font-weight:900;font-stretch:112%;line-height:1.15;letter-spacing:-.01em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.df-c .pie .s{font-size:13px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.df-c .q{position:absolute;right:12px;top:12px;min-width:32px;height:32px;padding:0 10px;border-radius:999px;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;font-variant-numeric:tabular-nums}
+.df-c{position:absolute;left:20px;right:20px;top:78px;height:100px;border-radius:24px;background:#fff;border:0;padding:10px 14px 10px 10px;display:flex;align-items:center;gap:14px;transform-origin:50% 0;will-change:transform,opacity,filter;box-shadow:0 1px 2px rgb(0 0 0/.06),0 10px 28px rgb(0 0 0/.12);cursor:pointer;color:#000;font:inherit;text-align:left}
+.df-c .im{flex:none;width:80px;height:80px;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1px #ececec;display:flex;align-items:center;justify-content:center;padding:6px;overflow:hidden}
+.df-c .im img{width:100%;height:100%;object-fit:contain;pointer-events:none}
+.df-c .pie{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.df-c .pie .t{font-size:16px;font-weight:800;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.df-c .pie .s{font-size:13.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.df-c .q{flex:none;min-width:32px;height:32px;padding:0 10px;border-radius:999px;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;font-variant-numeric:tabular-nums}
 .revela .grp .sw{animation:filaEntra .55s var(--snappy) both}
 .revela .grp .sw:nth-child(2){animation-delay:35ms}.revela .grp .sw:nth-child(3){animation-delay:70ms}.revela .grp .sw:nth-child(4){animation-delay:105ms}.revela .grp .sw:nth-child(5){animation-delay:140ms}.revela .grp .sw:nth-child(6){animation-delay:175ms}.revela .grp .sw:nth-child(7){animation-delay:210ms}.revela .grp .sw:nth-child(8){animation-delay:245ms}.revela .grp .sw:nth-child(9){animation-delay:280ms}.revela .grp .sw:nth-child(10){animation-delay:315ms}.revela .grp .sw:nth-child(11){animation-delay:350ms}.revela .grp .sw:nth-child(12){animation-delay:385ms}
 @keyframes filaEntra{from{opacity:0;transform:translateY(18px) scale(.97)}}
@@ -471,7 +471,7 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611161944';
+const APP_VERSION='202611161947';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -1694,7 +1694,7 @@ function toastAccion(m,txt,fn){ const t=$('#toast'); t.innerHTML=`<span>${esc(m)
 /* ============ Mazo en profundidad: las fichas que vienen esperan atrás, las que pasaron caen hacia adelante ============ */
 function mazoHTML(items){
   return `<div class="df" id="df" role="listbox" aria-label="Productos de la caja">${items.map((s,i)=>{ const p=S.productos.get(s.codigo)||{};
-    return `<button type="button" class="df-c" data-i="${i}" data-codigo="${esc(s.codigo)}" role="option" aria-label="${esc(p.nombre||s.codigo)}, ${s.cant} ${s.cant===1?'unidad':'unidades'}"><span class="im" data-flip="t-${esc(s.codigo)}">${p.foto?`<img src="${fotoUrl(p.foto)}" alt="" loading="${i<5?'eager':'lazy'}" draggable="false">`:ico('prod',56,'stroke:var(--ink-3);stroke-width:1.4')}</span><span class="pie"><span class="t">${esc(p.nombre||s.codigo)}</span><span class="s">${esc([p.marca,unidades(s.cant)].filter(Boolean).join(' · '))}</span></span><b class="q">${s.cant}</b></button>`; }).join('')}<span class="df-pos" id="dfPos" aria-live="polite"></span></div>`; }
+    return `<button type="button" class="df-c" data-i="${i}" data-codigo="${esc(s.codigo)}" role="option" aria-label="${esc(p.nombre||s.codigo)}, ${s.cant} ${s.cant===1?'unidad':'unidades'}"><span class="im" data-flip="t-${esc(s.codigo)}">${p.foto?`<img src="${fotoUrl(p.foto)}" alt="" loading="${i<5?'eager':'lazy'}" draggable="false">`:ico('prod',56,'stroke:var(--ink-3);stroke-width:1.4')}</span><span class="pie"><span class="t">${esc(p.nombre||s.codigo)}</span><span class="s">${esc(p.marca||unidades(s.cant))}</span></span><b class="q">${s.cant}</b></button>`; }).join('')}<span class="df-pos" id="dfPos" aria-live="polite"></span></div>`; }
 function iniciarMazo(){
   const df=$('#df'); if(!df||df._ok) return; df._ok=1;
   const cards=[...df.querySelectorAll('.df-c')], n=cards.length, f=V.f;
@@ -1702,8 +1702,8 @@ function iniciarMazo(){
   const pintar=()=>{ cards.forEach((c,i)=>{ const d=i-p;
       if(d>4.5||d<-2.2){ c.style.visibility='hidden'; return; } c.style.visibility='';
       let t, o=1, bl=0;
-      if(d>=0){ const ty=-Math.min(d,3)*17-Math.max(0,d-3)*6, sc=Math.pow(.93,d); t=`translateY(${ty}px) scale(${sc})`; bl=Math.min(4,d*1.4); o=d>3?Math.max(0,1-(d-3)/1.5)*.8:1-d*.07; }
-      else { const e=-d; t=`translateY(${e*260}px) scale(${1+e*.06}) rotateX(${Math.min(e,1.3)*22}deg)`; o=Math.max(0,1-e*1.15); }
+      if(d>=0){ const ty=-Math.min(d,3)*15-Math.max(0,d-3)*5, sc=Math.pow(.94,d); t=`translateY(${ty}px) scale(${sc})`; bl=Math.min(4,d*1.4); o=d>3?Math.max(0,1-(d-3)/1.5)*.8:1-d*.07; }
+      else { const e=-d; t=`translateY(${e*150}px) scale(${1+e*.05}) rotateX(${Math.min(e,1.3)*18}deg)`; o=Math.max(0,1-e*1.15); }
       c.style.transform=t; c.style.opacity=o; c.style.filter=bl>.05?`blur(${bl.toFixed(2)}px)`:''; c.style.zIndex=1000-Math.round(d*10); });
     const k=Math.max(0,Math.min(n-1,Math.round(p))); if(k!==foco){ foco=k; f.dfp=k; const ps=$('#dfPos'); if(ps) ps.textContent=`${k+1} de ${n}`;
       cards.forEach((x,i)=>x.setAttribute('aria-selected',i===k)); } };
@@ -1715,7 +1715,7 @@ function iniciarMazo(){
   let drag=null;
   df.addEventListener('pointerdown',e=>{ if(e.button>0) return; cancelAnimationFrame(raf); drag={y0:e.clientY,p0:p,mov:false,h:[[e.timeStamp,p]],id:e.pointerId,card:e.target.closest('.df-c')}; });
   df.addEventListener('pointermove',e=>{ if(!drag||e.pointerId!==drag.id) return; const dy=e.clientY-drag.y0; if(!drag.mov){ if(Math.abs(dy)<6) return; drag.mov=true; df.classList.add('arrastra'); try{ df.setPointerCapture(drag.id); }catch(_){} }
-    let np=drag.p0+dy/120; /* bajar el dedo = ir más profundo (la de adelante cae con el dedo) */ if(np<0) np=np*.3; if(np>n-1) np=n-1+(np-(n-1))*.3; p=np; drag.h.push([e.timeStamp,p]); if(drag.h.length>6) drag.h.shift(); pintar(); });
+    let np=drag.p0+dy/100; /* bajar el dedo = ir más profundo (la de adelante cae con el dedo) */ if(np<0) np=np*.3; if(np>n-1) np=n-1+(np-(n-1))*.3; p=np; drag.h.push([e.timeStamp,p]); if(drag.h.length>6) drag.h.shift(); pintar(); });
   const fin=e=>{ if(!drag||e.pointerId!==drag.id) return; const d=drag; drag=null; df.classList.remove('arrastra');
     if(!d.mov){ if(d.card){ const i=+d.card.dataset.i; if(i===Math.round(p)) go('producto',{codigo:d.card.dataset.codigo}); else { vel=0; ir(i); } } return; }
     const h=d.h, v=h.length>1?(h[h.length-1][1]-h[0][1])/Math.max(1,h[h.length-1][0]-h[0][0])*1000:0; // fichas por segundo
