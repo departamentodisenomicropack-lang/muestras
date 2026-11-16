@@ -133,3 +133,4 @@ Un solo sistema de movimiento, sin librerías (módulo "Motion" en index.html):
 - El texto que se transforma ya no usa desenfoque: en iPhone dejaba un fondo blanco dentro del botón negro.
 - **Sacar / Mover / Devolver** viven solo en la ficha de cada producto (ya no en la caja). Si entrás al producto desde una caja, esa caja queda elegida como origen.
 - Fichas del fichero agrandadas (nov 2026): 184 px de alto, foto de 156 px a la izquierda, nombre hasta 3 líneas, cantidad en círculo arriba a la derecha.
+- **Cajas de cartón 3D** (nov 2026): en el inicio cada caja se dibuja como una caja de cartón kraft cerrada, con la galleta estampada en la tapa (CSS 3D, `cubo()`). Al tocarla crece al centro con su nombre impreso al frente, se abre la tapa, asoman tres fichas y se pasa al fichero (`abrirCaja()`, ~1 s). Con 'reducir movimiento' entra directo.
