@@ -125,3 +125,4 @@ Un solo sistema de movimiento, sin librerías (módulo "Motion" en index.html):
 - **Deslizar con física**: decide por recorrido o velocidad del dedo; los botones aparecen de a poco; "No completar" se puede deshacer.
 - **Sobriedad**: sin confeti en el ¡Listo! (es algo frecuente); el adorno queda para lo raro.
 - Respeta "reducir movimiento" del sistema.
+- **Mazo en profundidad** (inspirado en "Depth Flow Carousel" de Framer): en una caja con 2 o más productos, la vista "Fichas" muestra los productos como un mazo. Las que vienen esperan apiladas atrás, la de adelante se lee entera y las que pasan caen hacia vos. Se recorre arrastrando arriba/abajo (con velocidad y resorte), con la rueda o las flechas; tocar la de adelante abre el producto. "Lista" sigue teniendo el deslizar para mover/borrar (con confirmación).

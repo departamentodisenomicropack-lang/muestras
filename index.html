@@ -401,6 +401,23 @@ body.escaneo .toast{background:#fff;color:#000}
 .drop.falta{border-color:var(--red);color:var(--red)}
 .auto{font-weight:600;color:var(--acc-ink)}
 .sw.chau{transition:height .3s cubic-bezier(.2,0,0,1),opacity .3s,margin .3s;opacity:0}
+
+/* Mazo en profundidad (depth flow) para recorrer los productos de una caja */
+.df{position:relative;height:390px;margin:6px -16px 84px;perspective:900px;perspective-origin:50% 20%;touch-action:none;-webkit-user-select:none;user-select:none;overflow:hidden;cursor:grab}
+.df.arrastra{cursor:grabbing}
+.df-c{position:absolute;left:50%;top:92px;width:212px;height:262px;margin-left:-106px;border-radius:26px;background:#fff;border:0;padding:0;overflow:hidden;display:flex;flex-direction:column;transform-origin:50% 0;will-change:transform,opacity;box-shadow:0 1px 2px rgb(0 0 0/.08),0 14px 34px rgb(0 0 0/.14);cursor:pointer;color:#000;font:inherit}
+.df-c::after{content:"";position:absolute;inset:0;background:#000;opacity:var(--sh,0);pointer-events:none;border-radius:inherit}
+.df-c .im{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:16px;background:#fff}
+.df-c .im img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}
+.df-c .pie{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--fill);text-align:left}
+.df-c .pie span{flex:1;font-size:13px;font-weight:800;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.df-c .pie b{flex:none;min-width:30px;height:30px;padding:0 8px;border-radius:999px;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;font-variant-numeric:tabular-nums}
+.df-info{display:flex;align-items:center;gap:12px;margin-top:6px;padding:14px 14px 14px 18px;border-radius:24px;background:var(--fill)}
+.df-info .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.df-info .tx b{font-size:17px;font-weight:900;font-stretch:115%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.df-info .tx span{font-size:13px;color:var(--ink-2)}
+.df-info .btn{flex:none;min-height:44px;padding:0 16px;font-size:14px}
+.df-pos{position:absolute;right:20px;top:8px;font-size:13px;font-weight:800;color:var(--ink-3);font-variant-numeric:tabular-nums}
 /* ===== Motion (sistema del prototipo) ===== */
 .ghost{position:fixed;z-index:70;pointer-events:none;will-change:left,top,width,height}
 #app.vista-entra>*:not(.fab){animation:vistaEntra .5s var(--snappy) both}
@@ -454,7 +471,7 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611161929';
+const APP_VERSION='202611161934';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -974,14 +991,16 @@ escanear:{ html(){
 /* ---------- Caja ---------- */
 caja:{ html(){
   const c=S.cajas.get(V.p.id); if(!c) return `${cabecera()}<div class="empty"><b>Esta caja ya no existe</b></div>`;
-  const items=stockEn(V.p.id); const unid=items.reduce((a,s)=>a+s.cant,0); const nprod=new Set(items.map(s=>s.codigo)).size;
+  const items=stockEn(V.p.id); const unid=items.reduce((a,s)=>a+s.cant,0); const nprod=new Set(items.map(s=>s.codigo)).size; const vista=items.length>1?(V.f.vista||'fichas'):'lista';
   const grupos={}; items.forEach(s=>{ const p=S.productos.get(s.codigo)||{}; const k=[p.cliente,p.proyecto].filter(Boolean).join(' · ')||'Sin proyecto'; (grupos[k]=grupos[k]||[]).push(s); });
   return `${cabecera(iconBtn(`data-go="etiqueta" data-id="${esc(V.p.id)}"`,'tag','Etiqueta')+iconBtn(`data-go="nuevaCaja" data-id="${esc(V.p.id)}"`,'edit','Editar caja'))}
   <p class="kicker">${esc(c.lugar||'Sin lugar')}</p><h1 class="md">${esc(c.nombre)}</h1>
   ${items.length?`<p class="stat-line"><b>${nprod}</b> ${nprod===1?'producto':'productos'}, <b>${roll('caja-'+V.p.id,unid)}</b> ${unid===1?'unidad':'unidades'}</p>
-  <p class="help" style="margin-top:6px">Deslizá un producto a la izquierda para moverlo o borrarlo.</p>
+  <p class="help" style="margin-top:6px">${vista==='fichas'?'Deslizá hacia arriba o abajo para recorrer los productos. Tocá el de adelante para abrirlo.':'Deslizá un producto a la izquierda para moverlo o borrarlo.'}</p>
   <div class="acts3">${[['sacar','Sacar','out'],['mover','Mover','arrow'],['devolver','Devolver','user']].map(([k,l,ic])=>`<button class="accion" data-mov="${k}" data-desde="${esc(V.p.id)}"><span class="bub">${ico(ic,18,'stroke:#fff')}</span>${l}</button>`).join('')}</div>`:''}
-  ${items.length?`<div class="grp" style="margin-top:14px">${items.sort((a,b)=>prodNom(a.codigo).localeCompare(prodNom(b.codigo),'es')).map(s=>filaProd(s,esc(S.productos.get(s.codigo)?.marca||''))).join('')}</div>`
+  ${items.length>1?`<div class="seg" role="tablist" aria-label="Cómo ver los productos" style="margin-top:16px">${[['fichas','Fichas'],['lista','Lista']].map(([k,l])=>`<button role="tab" data-cvista="${k}" aria-selected="${vista===k}">${l}</button>`).join('')}</div>`:''}
+  ${items.length&&vista==='fichas'?mazoHTML(items.sort((a,b)=>prodNom(a.codigo).localeCompare(prodNom(b.codigo),'es'))):''}
+  ${items.length&&vista!=='fichas'?`<div class="grp" style="margin-top:14px">${items.sort((a,b)=>prodNom(a.codigo).localeCompare(prodNom(b.codigo),'es')).map(s=>filaProd(s,esc(S.productos.get(s.codigo)?.marca||''))).join('')}</div>`
    :`<div class="empty"><b>Está vacía</b><p>Tocá “Agregar acá” y escaneá los productos que metas en esta caja.</p></div>`}
   <button type="button" class="fab" data-mov="ingresar" data-caja="${esc(V.p.id)}"><span class="shape">${shape(GALLETA,44,'#a35e47')}<svg class="ico" width="20" height="20" viewBox="0 0 24 24"><path d="${I.scan}"/></svg></span>Agregar acá</button>`;
 }},
@@ -1650,19 +1669,56 @@ function toastAccion(m,txt,fn){ const t=$('#toast'); t.innerHTML=`<span>${esc(m)
   t.querySelector('.tacc').onclick=()=>{ t.hidden=true; fn(); }; clearTimeout(toast._t); toast._t=setTimeout(()=>{ t.hidden=true; },4500);
   if(!RM) t.animate([{opacity:0,transform:'translateX(-50%) translateY(16px)'},{opacity:1,transform:'translateX(-50%)'}],{duration:SP.smooth.d,easing:SP.smooth.e}); }
 
+
+/* ============ Mazo en profundidad: las fichas que vienen esperan atrás, las que pasaron caen hacia adelante ============ */
+function mazoHTML(items){
+  return `<div class="df" id="df" role="listbox" aria-label="Productos de la caja">${items.map((s,i)=>{ const p=S.productos.get(s.codigo)||{};
+    return `<button type="button" class="df-c" data-i="${i}" data-codigo="${esc(s.codigo)}" role="option" aria-label="${esc(p.nombre||s.codigo)}, ${s.cant} ${s.cant===1?'unidad':'unidades'}"><span class="im">${p.foto?`<img src="${fotoUrl(p.foto)}" alt="" loading="lazy" draggable="false">`:ico('prod',44,'stroke:var(--ink-3);stroke-width:1.6')}</span><span class="pie"><span>${esc(p.nombre||s.codigo)}</span><b>${s.cant}</b></span></button>`; }).join('')}<span class="df-pos" id="dfPos" aria-live="polite"></span></div>`; }
+function iniciarMazo(){
+  const df=$('#df'); if(!df||df._ok) return; df._ok=1;
+  const cards=[...df.querySelectorAll('.df-c')], n=cards.length, f=V.f;
+  let p=Math.max(0,Math.min(n-1,f.dfp||0)), vel=0, raf=0, foco=-1;
+  const pintar=()=>{ cards.forEach((c,i)=>{ const d=i-p;
+      if(d>7||d<-2.2){ c.style.visibility='hidden'; return; } c.style.visibility='';
+      let t, o=1, sh=0;
+      if(d>=0){ const ty=-(1-Math.pow(.8,d))*84, sc=Math.pow(.9,d); t=`translateY(${ty}px) scale(${sc})`; sh=Math.min(.32,d*.07); o=d>5.5?Math.max(0,1-(d-5.5)/1.5):1; }
+      else { const e=-d; t=`translateY(${e*250}px) scale(${1+e*.1}) rotateX(${Math.min(e,1.3)*34}deg)`; o=Math.max(0,1-e*.6); }
+      c.style.transform=t; c.style.opacity=o; c.style.setProperty('--sh',sh); c.style.zIndex=1000-Math.round(d*10); });
+    const k=Math.max(0,Math.min(n-1,Math.round(p))); if(k!==foco){ foco=k; f.dfp=k; const ps=$('#dfPos'); if(ps) ps.textContent=`${k+1} de ${n}`;
+      cards.forEach((x,i)=>x.setAttribute('aria-selected',i===k)); } };
+  // resorte en unidades de "ficha": responde a la velocidad del dedo y se puede agarrar en el aire
+  const ir=dest=>{ dest=Math.max(0,Math.min(n-1,dest)); cancelAnimationFrame(raf); if(RM){ p=dest; vel=0; pintar(); return; } let last=performance.now();
+    const paso=now=>{ const dt=Math.min(.032,(now-last)/1000); last=now; const a=-200*(p-dest)-28*vel; vel+=a*dt; p+=vel*dt;
+      if(Math.abs(p-dest)<.001&&Math.abs(vel)<.01){ p=dest; vel=0; pintar(); return; } pintar(); raf=requestAnimationFrame(paso); };
+    raf=requestAnimationFrame(paso); };
+  let drag=null;
+  df.addEventListener('pointerdown',e=>{ if(e.button>0) return; cancelAnimationFrame(raf); drag={y0:e.clientY,p0:p,mov:false,h:[[e.timeStamp,p]],id:e.pointerId,card:e.target.closest('.df-c')}; });
+  df.addEventListener('pointermove',e=>{ if(!drag||e.pointerId!==drag.id) return; const dy=e.clientY-drag.y0; if(!drag.mov){ if(Math.abs(dy)<6) return; drag.mov=true; df.classList.add('arrastra'); try{ df.setPointerCapture(drag.id); }catch(_){} }
+    let np=drag.p0-dy/120; if(np<0) np=np*.3; if(np>n-1) np=n-1+(np-(n-1))*.3; p=np; drag.h.push([e.timeStamp,p]); if(drag.h.length>6) drag.h.shift(); pintar(); });
+  const fin=e=>{ if(!drag||e.pointerId!==drag.id) return; const d=drag; drag=null; df.classList.remove('arrastra');
+    if(!d.mov){ if(d.card){ const i=+d.card.dataset.i; if(i===Math.round(p)) go('producto',{codigo:d.card.dataset.codigo}); else { vel=0; ir(i); } } return; }
+    const h=d.h, v=h.length>1?(h[h.length-1][1]-h[0][1])/Math.max(1,h[h.length-1][0]-h[0][0])*1000:0; // fichas por segundo
+    vel=v; ir(Math.round(p+v*.18)); };
+  df.addEventListener('pointerup',fin); df.addEventListener('pointercancel',fin);
+  df.addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); },true);
+  let wt=null; df.addEventListener('wheel',e=>{ e.preventDefault(); cancelAnimationFrame(raf); p=Math.max(-.3,Math.min(n-.7,p+e.deltaY/260)); pintar(); clearTimeout(wt); wt=setTimeout(()=>{ vel=0; ir(Math.round(p)); },110); },{passive:false});
+  df.addEventListener('keydown',e=>{ if(e.key==='ArrowDown'||e.key==='ArrowRight'){ e.preventDefault(); ir(Math.round(p)+1); } if(e.key==='ArrowUp'||e.key==='ArrowLeft'){ e.preventDefault(); ir(Math.round(p)-1); } });
+  // entrada: el mazo se acomoda desde atrás
+  if(!RM&&!f._dfVisto){ f._dfVisto=1; const dest=p; p=dest+3; pintar(); vel=0; ir(dest); } else pintar(); }
 function render(){
   const v=VIEWS[V.view]||VIEWS.inicio; let banner='';
   if(conexion==='sin') banner=`<p class="banner err">No me pude conectar con la planilla. Revisá la conexión; reintento solo.</p>`;
   else if(conexion==='cargando'&&!S.cajas.size) banner=`<p class="banner">Cargando las muestras…</p>`;
   const flipPrev=flipCapturar('t-');
   $('#app').innerHTML=banner+v.html();
-  requestAnimationFrame(()=>{ flipAnimar(flipPrev,'t-'); animarRolls(); });
+  requestAnimationFrame(()=>{ flipAnimar(flipPrev,'t-'); animarRolls(); if($('#df')) iniciarMazo(); });
   $('#nav').hidden=true;
   const osc=V.view==='mov'&&V.f.tipo==='ingresar'; document.body.classList.toggle('escaneo',osc);
   const tc=document.querySelector('meta[name="theme-color"]'); if(tc) tc.content=osc?'#000000':'#ffffff';
 }
 document.addEventListener('click',e=>{
   const fl=e.target.closest('[data-filtro]'); if(fl){ V.f.filtro=fl.dataset.filtro; render(); return; }
+  const cv=e.target.closest('[data-cvista]'); if(cv){ const y=window.scrollY; V.f.vista=cv.dataset.cvista; render(); window.scrollTo(0,y); return; }
   const dz=e.target.closest('[data-desapartar]'); if(dz){ quitarApartado(dz.dataset.desapartar,dz.dataset.caja); render(); return; }
   const mv=e.target.closest('[data-mov]'); if(mv){ e.preventDefault(); if(mv.disabled) return; if(V.view==='camara'){ salir(); V=pila.pop()||{view:'inicio',p:{},f:{}}; } const args={tipo:mv.dataset.mov,codigo:mv.dataset.codigo,caja:mv.dataset.caja,desde:mv.dataset.desde};
     if(mv.classList.contains('fab')&&args.tipo==='ingresar'){ abrirMorph(mv,'#000',()=>go('mov',args)); return; }
