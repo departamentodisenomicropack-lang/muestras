@@ -411,6 +411,11 @@ body.escaneo .toast{background:#fff;color:#000}
 .df-c .pie{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .df-c .pie .t{font-size:16px;font-weight:800;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .df-c .pie .s{font-size:13.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sumar{margin-top:12px;background:var(--fill);border-radius:28px;padding:16px;display:flex;flex-direction:column;gap:12px;animation:sumarAbre .5s var(--snappy) both;transform-origin:50% 0}
+.sumar .cap{margin:0;font-size:13px;font-weight:600;color:var(--ink-3)}
+.sumar .chip{background:#fff}.sumar .chip[aria-pressed="true"]{background:#000;color:#fff}
+.sumar .cant-big{background:#fff}.sumar .cant-big button{background:var(--fill)}.sumar .cant-big button.p{background:#000}
+@keyframes sumarAbre{from{opacity:0;transform:translateY(-8px) scale(.97)}}
 .df-acts{position:absolute;left:20px;right:20px;top:78px;height:100px;display:flex;justify-content:flex-end;border-radius:24px;overflow:hidden;opacity:var(--p,0);z-index:995}
 .df-acts .sw-b{min-width:92px;transform:scale(calc(.82 + .18*var(--p,0)));transform-origin:right center}
 .df-c .q{flex:none;min-width:32px;height:32px;padding:0 10px;border-radius:999px;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;font-variant-numeric:tabular-nums}
@@ -473,7 +478,7 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611161952';
+const APP_VERSION='202611161954';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -1034,7 +1039,7 @@ producto:{ html(){
    :`<p style="margin:10px 0 0;color:var(--on-dark)">${S.prestamos.some(x=>x.codigo===c)?'No queda nada guardado.':esc(textoSalida(c))}</p>`}
   ${S.prestamos.filter(x=>x.codigo===c).map(x=>`<button class="item" data-go="devolver" data-id="${esc(x.id)}" style="margin-top:6px"><span style="flex:none;width:36px;height:36px;border-radius:999px;background:#3a3a3a;display:flex;align-items:center;justify-content:center">${ico('user',18,'stroke:#fff')}</span><span class="tx"><b>Prestada a ${esc(x.a)}</b><span${vencido(x)?' style="color:var(--red-soft)"':''}>${x.hasta?`${vencido(x)?'Venció':'Vuelve'} el ${esc(fechaCorta(x.hasta))}`:'Sin fecha'}</span></span><b style="font-size:20px;font-weight:900;font-stretch:125%">${x.cant}</b></button>`).join('')}</div>
   ${st.length?`<div class="acts3">${[['sacar','Sacar','out'],['mover','Mover','arrow'],['devolver','Devolver','user']].map(([k,l,ic])=>`<button class="accion" data-hoja="${k}"><span class="bub">${ico(ic,18,'stroke:#fff')}</span>${l}</button>`).join('')}</div>`:''}
-  <div style="display:flex;justify-content:center"><button type="button" class="link acc" data-mov="ingresar" data-codigo="${esc(c)}">+ Agregar más unidades</button></div>
+  ${V.f.sumar?panelSumar(c):`<div style="display:flex;justify-content:center"><button type="button" class="link acc" data-act="abrirSumar">+ Agregar más unidades</button></div>`}
   ${dims.length||p.peso?`<div class="medidas"><span>Medidas</span><b>${dims.length?esc(dims.join(' × '))+' mm':''}${dims.length&&p.peso?' · ':''}${p.peso?esc(p.peso)+' g':''}</b></div>`:''}
   <div class="sec"><h2>Historial</h2></div>
   ${hist?(hist.length?`<ol class="feed">${hist.map(textoMov).join('')}</ol>`:`<p class="help">Sin movimientos.</p>`):`<p class="help">Cargando…</p>`}
@@ -1389,6 +1394,16 @@ function hojaAccion(c){ const h=V.f.hoja, p=S.productos.get(c)||{}; const st=sto
    ${h.tipo==='sacar'?extra+desde:desde+extra}
    <div class="cant-big" role="group" aria-label="Cantidad"><button type="button" data-hcant="-1" aria-label="Una menos">−</button><b>${h.cant}</b><button type="button" class="p" data-hcant="1" aria-label="Una más">+</button></div>
    <button type="button" class="btn pri" style="min-height:56px;flex:none" data-act="confirmarHoja">${verbo} ${unidades(h.cant)}${h.tipo==='mover'&&h.hacia?' a '+esc(cajaNom(h.hacia)):''}</button></div>`; }
+/* ----- Agregar más unidades de un producto que ya conocemos: se despliega ahí mismo, sin escáner ----- */
+function panelSumar(c){ const f=V.f.sumar, st=stockDe(c).sort((a,b)=>b.cant-a.cant);
+  if(f.caja===undefined) f.caja=st[0]?.caja||''; const anim=f._a?' style="animation:none"':''; f._a=1;
+  const otras=cajasOrden().filter(x=>!st.some(s=>s.caja===x.id));
+  return `<div class="sumar"${anim}><div class="between" style="align-items:center"><b style="font-size:17px">Agregar más unidades</b><button type="button" class="round" data-act="cerrarSumar" aria-label="Cerrar" style="width:36px;height:36px">${ico('x',16)}</button></div>
+   <p class="cap">A qué caja</p>
+   ${st.length?`<div class="chips">${st.map(s=>`<button type="button" class="chip" data-scaja="${esc(s.caja)}" aria-pressed="${s.caja===f.caja}">${esc(cajaNom(s.caja))} · ${s.cant}</button>`).join('')}</div>`:''}
+   ${otras.length?`<select class="in onfill" id="s_otra" aria-label="Otra caja"><option value="">${st.length?'Otra caja…':'Elegí la caja…'}</option>${otras.map(x=>`<option value="${esc(x.id)}" ${x.id===f.caja?'selected':''}>${esc(x.nombre)}</option>`).join('')}</select>`:''}
+   <div class="cant-big" role="group" aria-label="Cantidad"><button type="button" data-scant="-1" aria-label="Una menos">−</button><b>${roll('sumar',f.cant)}</b><button type="button" class="p" data-scant="1" aria-label="Una más">+</button></div>
+   <button type="button" class="btn pri" style="min-height:56px" data-act="confirmarSumar" ${f.caja?'':'disabled'}>${f.caja?`Agregar ${unidades(f.cant)} a ${esc(cajaNom(f.caja))}`:'Elegí la caja'}</button></div>`; }
 function clienteDeCaja(id){ const n=S.cajas.get(id)?.nombre?.split(' - ')[0]; if(!n) return ''; const cls=clientes(); return cls.find(x=>norm(x)===norm(n))||n; }
 /* ----- Apartados: códigos que no se completaron solos, para cargarlos a mano después ----- */
 const AP_KEY='stock-apartados';
@@ -1538,6 +1553,11 @@ const ACCIONES={
   esperarCaja(){ V.f.hojaDestino=0; V.f.esperandoCaja=1; pintarHojaDestino(); avisoCam('Apuntá al QR de la caja'); },
   cerrarDestino(){ V.f.hojaDestino=0; pintarHojaDestino(); },
   cerrarHoja(){ V.f.hoja=null; const y=window.scrollY; render(); window.scrollTo(0,y); },
+  abrirSumar(){ const y=window.scrollY; delete ROLLS.sumar; V.f.sumar={cant:1}; render(); window.scrollTo(0,y); setTimeout(()=>{ const el=$('.sumar'); if(el) el.scrollIntoView({behavior:RM?'auto':'smooth',block:'nearest'}); },60); },
+  cerrarSumar(){ const y=window.scrollY; V.f.sumar=null; render(); window.scrollTo(0,y); },
+  async confirmarSumar(){ const f=V.f.sumar, c=V.p.codigo; if(!f||!f.caja) return;
+    const d=await escribir('transaccion',[{tipo:'ingresar',items:[{codigo:c,cant:f.cant,desde:''}],caja:f.caja,nota:'',por:miNombre}]); if(!d) return;
+    const msg=`Agregaste ${unidades(f.cant)} a ${cajaNom(f.caja)}`; V.f.sumar=null; V.f.hist=null; const y=window.scrollY; render(); window.scrollTo(0,y); cargarHist(); toast(msg); },
   async confirmarHoja(){ const h=V.f.hoja, c=V.p.codigo; if(!h) return;
     if(h.tipo==='mover'&&!h.hacia){ toast('Elegí a qué caja va.'); return; }
     const t={sacar:{tipo:'sacar',motivo:h.motivo||'usada'},devolver:{tipo:'sacar',motivo:'devolver'},mover:{tipo:'mover'}}[h.tipo];
@@ -1754,6 +1774,9 @@ function render(){
 }
 document.addEventListener('click',e=>{
   const fl=e.target.closest('[data-filtro]'); if(fl){ V.f.filtro=fl.dataset.filtro; render(); return; }
+  if(V.f.sumar){ const sc=e.target.closest('[data-scaja]'); if(sc){ const y=window.scrollY; V.f.sumar.caja=sc.dataset.scaja; render(); window.scrollTo(0,y); return; }
+    const sn=e.target.closest('[data-scant]'); if(sn){ const f=V.f.sumar; f.cant=Math.max(1,Math.min(999,f.cant+Number(sn.dataset.scant))); const b=$('.sumar .cant-big b'); if(b){ b.innerHTML=roll('sumar',f.cant); animarRolls(); }
+      const bt=$('.sumar [data-act="confirmarSumar"]'); if(bt&&f.caja) morphText(bt,`Agregar ${unidades(f.cant)} a ${cajaNom(f.caja)}`); return; } }
   const cv=e.target.closest('[data-cvista]'); if(cv){ if(V.f.vista===cv.dataset.cvista||(!V.f.vista&&cv.dataset.cvista==='fichas')) return; const y=window.scrollY; V.f.vista=cv.dataset.cvista; V.f._dfVisto=1; render(); window.scrollTo(0,y);
     if(V.f.vista==='lista'&&!RM){ const app=$('#app'); app.classList.add('revela'); setTimeout(()=>app.classList.remove('revela'),900); } return; }
   const dz=e.target.closest('[data-desapartar]'); if(dz){ quitarApartado(dz.dataset.desapartar,dz.dataset.caja); render(); return; }
@@ -1799,6 +1822,7 @@ document.addEventListener('input',e=>{
   if(V.f._faltan&&V.f._faltan.includes(k)){ V.f._faltan=V.f._faltan.filter(x=>x!==k); t.classList.remove('falta'); }
 });
 document.addEventListener('change',e=>{
+  if(e.target.id==='s_otra'&&V.f.sumar){ V.f.sumar.caja=e.target.value; const y=window.scrollY; render(); window.scrollTo(0,y); return; }
   if(e.target.id==='h_hacia'&&V.f.hoja){ V.f.hoja.hacia=e.target.value; const y=window.scrollY; render(); window.scrollTo(0,y); return; }
   if(e.target.id==='h_otra'&&e.target.value&&V.view==='mov'){ V.f.caja=e.target.value; V.f.hojaDestino=0; pintarHojaDestino(); ACCIONES.aplicarMov(); return; }
   if(e.target.id==='galeriaIn'){ const file=e.target.files&&e.target.files[0]; e.target.value=''; if(file) fotoElegida(V,file); return; }
