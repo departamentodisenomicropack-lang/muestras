@@ -433,11 +433,11 @@ body.escaneo .toast{background:#fff;color:#000}
 .roll .rd{display:inline-block;height:1.1em;overflow:hidden}
 .roll .rc{display:flex;flex-direction:column;transition:transform .9s var(--spring)}
 .roll .rc span{display:block;height:1.1em;line-height:1.1em;text-align:center}
-.tm{display:inline-block}
+.tm{display:inline-block;background:none;color:inherit}
 .tm.in{animation:tmIn .5s var(--snappy) both}
 .tm.out{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;animation:tmOut .28s ease-in both;pointer-events:none}
-@keyframes tmIn{from{opacity:0;transform:translateY(10px);filter:blur(4px)}}
-@keyframes tmOut{to{opacity:0;transform:translateY(-10px);filter:blur(4px)}}
+@keyframes tmIn{from{opacity:0;transform:translateY(10px)}}
+@keyframes tmOut{to{opacity:0;transform:translateY(-10px)}}
 .cam .marco{transition:transform .5s var(--bouncy)}
 .cam .marco i{transition:border-color .2s}
 .cam.lock .marco{transform:scale(.93)}
@@ -478,7 +478,7 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611161954';
+const APP_VERSION='202611162000';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -1007,15 +1007,17 @@ escanear:{ html(){
 /* ---------- Caja ---------- */
 caja:{ html(){
   const c=S.cajas.get(V.p.id); if(!c) return `${cabecera()}<div class="empty"><b>Esta caja ya no existe</b></div>`;
-  const items=stockEn(V.p.id); const unid=items.reduce((a,s)=>a+s.cant,0); const nprod=new Set(items.map(s=>s.codigo)).size; 
+  const items=stockEn(V.p.id); const unid=items.reduce((a,s)=>a+s.cant,0); const nprod=new Set(items.map(s=>s.codigo)).size; const vista=items.length>1?(V.f.vista||'fichas'):'lista'; 
   const grupos={}; items.forEach(s=>{ const p=S.productos.get(s.codigo)||{}; const k=[p.cliente,p.proyecto].filter(Boolean).join(' · ')||'Sin proyecto'; (grupos[k]=grupos[k]||[]).push(s); });
   return `${cabecera(iconBtn(`data-go="etiqueta" data-id="${esc(V.p.id)}"`,'tag','Etiqueta')+iconBtn(`data-go="nuevaCaja" data-id="${esc(V.p.id)}"`,'edit','Editar caja'))}
   <p class="kicker">${esc(c.lugar||'Sin lugar')}</p><h1 class="md">${esc(c.nombre)}</h1>
   ${items.length?`<p class="stat-line"><b>${nprod}</b> ${nprod===1?'producto':'productos'}, <b>${roll('caja-'+V.p.id,unid)}</b> ${unid===1?'unidad':'unidades'}</p>
-  <p class="help" style="margin-top:6px">${items.length>1?'Bajá el dedo para pasar a la siguiente ficha. Deslizá a la izquierda para moverla o borrarla.':'Deslizá el producto a la izquierda para moverlo o borrarlo.'}</p>
+  <p class="help" style="margin-top:6px">${items.length>1?(vista==='fichas'?'Bajá el dedo para pasar a la siguiente ficha. Deslizá a la izquierda para moverla o borrarla.':'Deslizá un producto a la izquierda para moverlo o borrarlo.'):'Deslizá el producto a la izquierda para moverlo o borrarlo.'}</p>
   <div class="acts3">${[['sacar','Sacar','out'],['mover','Mover','arrow'],['devolver','Devolver','user']].map(([k,l,ic])=>`<button class="accion" data-mov="${k}" data-desde="${esc(V.p.id)}"><span class="bub">${ico(ic,18,'stroke:#fff')}</span>${l}</button>`).join('')}</div>`:''}
-  ${items.length>1?mazoHTML(items.sort((a,b)=>prodNom(a.codigo).localeCompare(prodNom(b.codigo),'es'))):''}
-  ${items.length?`${items.length>1?`<div class="sec"><h2>Todos los productos</h2><span class="m">${items.length}</span></div>`:''}<div class="grp" style="margin-top:${items.length>1?8:14}px">${items.sort((a,b)=>prodNom(a.codigo).localeCompare(prodNom(b.codigo),'es')).map(s=>filaProd(s,esc(S.productos.get(s.codigo)?.marca||''))).join('')}</div>`:''}
+  ${items.length>1?`<div class="seg" role="tablist" aria-label="Cómo ver los productos" style="margin-top:16px">${[['fichas','Fichero'],['lista','Lista']].map(([k,l])=>`<button role="tab" data-cvista="${k}" aria-selected="${vista===k}">${l}</button>`).join('')}</div>`:''}
+  ${items.length&&vista==='fichas'?mazoHTML(ordenClase(items)):''}
+  ${items.length&&vista!=='fichas'?`<div class="grp" style="margin-top:14px">${ordenClase(items).map(s=>filaProd(s,esc(S.productos.get(s.codigo)?.marca||''))).join('')}</div>`:''}
+  ${(()=>{ const mv=S.movs.filter(m=>m.hacia===V.p.id||m.desde===V.p.id).slice(0,15); return mv.length?`<div class="sec"><h2>Historial</h2></div><ol class="feed">${mv.map(textoMov).join('')}</ol>`:''; })()}
   ${items.length?'':`<div class="empty"><b>Está vacía</b><p>Tocá “Agregar acá” y escaneá los productos que metas en esta caja.</p></div>`}
   <button type="button" class="fab" data-mov="ingresar" data-caja="${esc(V.p.id)}"><span class="shape">${shape(GALLETA,44,'#a35e47')}<svg class="ico" width="20" height="20" viewBox="0 0 24 24"><path d="${I.scan}"/></svg></span>Agregar acá</button>`;
 }},
@@ -1713,6 +1715,27 @@ function toastAccion(m,txt,fn){ const t=$('#toast'); t.innerHTML=`<span>${esc(m)
 
 
 /* ============ Mazo en profundidad: las fichas que vienen esperan atrás, las que pasaron caen hacia adelante ============ */
+// Clase de producto, para que las fichas parecidas queden juntas (shampoos con shampoos, maquillaje con maquillaje…).
+// No se muestra: solo ordena. Se reconoce por palabras del nombre (y la marca).
+const CLASES=[
+ ['cabello',/\b(shampoo|champu|acondicionador|enjuague capilar|crema de peinar|peinar|mascara capilar|tratamiento capilar|capilar|ampolla|tintura|coloracion|decolorante|keratina|serum capilar|spray para el pelo|laca|gel fijador|fijacion|cera para el pelo|pelo|cabello)\b/],
+ ['maquillaje',/\b(labial|lipstick|gloss|base de maquillaje|base liquida|corrector|polvo compacto|polvo suelto|rubor|bronceador|iluminador|sombra|paleta|mascara de pestanas|rimel|delineador|lapiz de ojos|cejas|primer|maquillaje|makeup|bb cream|cc cream)\b/],
+ ['unas',/\b(esmalte|quitaesmalte|removedor|cuticula|cuticulas|unas|top coat|base coat|endurecedor)\b/],
+ ['piel',/\b(crema|locion|emulsion|hidratante|serum|contorno de ojos|protector solar|fps|spf|autobronceante|exfoliante|limpiador facial|agua micelar|tonico|mascarilla|facial|corporal|body lotion|vaselina|manteca)\b/],
+ ['limpieza',/\b(detergente|lavandina|limpiador|desinfectante|lavavajillas|suavizante|jabon en polvo|jabon liquido para ropa|quitamanchas|aromatizante|insecticida|esponja|trapo|bolsas de residuos|papel higienico|rollo de cocina|servilletas)\b/],
+ ['higiene',/\b(desodorante|antitranspirante|jabon|gel de ducha|gel de bano|body wash|talco|toallitas|toallas femeninas|tampones|protector diario|afeitar|afeitadora|maquina de afeitar|espuma de afeitar|aftershave|preservativo)\b/],
+ ['perfume',/\b(perfume|colonia|eau de|fragancia|body splash|body mist)\b/],
+ ['bucal',/\b(pasta dental|crema dental|dentifrico|cepillo dental|cepillo de dientes|enjuague bucal|hilo dental|bucal)\b/],
+ ['bebe',/\b(panal|panales|bebe|baby|mamadera|chupete)\b/],
+ ['golosinas',/\b(chocolate|oblea|alfajor|bombon|bombones|caramelo|caramelos|chicle|chicles|confite|confites|turron|gomita|gomitas|galletita|galletitas|galleta|barrita|cereal|bocadito|kitkat|bon o bon)\b/],
+ ['snacks',/\b(papas fritas|snack|snacks|mani|palitos|chizitos|nachos|tostadas|grisines)\b/],
+ ['bebidas',/\b(gaseosa|agua|jugo|bebida|cerveza|vino|fernet|aperitivo|energizante|isotonica|soda|te frio|cafe frio)\b/],
+ ['almacen',/\b(yerba|cafe|te |mate cocido|azucar|edulcorante|harina|arroz|fideos|pasta|aceite|vinagre|sal|mayonesa|ketchup|mostaza|aderezo|salsa|pure|enlatado|conserva|atun|caldo|sopa|leche|yogur|queso|manteca|dulce de leche|mermelada)\b/],
+ ['mascotas',/\b(perro|gato|mascota|mascotas|alimento balanceado|piedritas)\b/],
+];
+function claseDe(codigo){ const p=S.productos.get(codigo)||{}; const t=' '+norm((p.nombre||'')+' '+(p.marca||'')).replace(/[^a-z0-9 ]/g,' ')+' ';
+  for(let i=0;i<CLASES.length;i++) if(CLASES[i][1].test(t)) return i; return CLASES.length; }
+function ordenClase(items){ return [...items].sort((a,b)=>claseDe(a.codigo)-claseDe(b.codigo)||prodNom(a.codigo).localeCompare(prodNom(b.codigo),'es')); }
 function mazoHTML(items){
   return `<div class="df" id="df" role="listbox" aria-label="Productos de la caja">${items.map((s,i)=>{ const p=S.productos.get(s.codigo)||{};
     return `<button type="button" class="df-c" data-i="${i}" data-codigo="${esc(s.codigo)}" role="option" aria-label="${esc(p.nombre||s.codigo)}, ${s.cant} ${s.cant===1?'unidad':'unidades'}"><span class="im" data-flip="t-${esc(s.codigo)}">${p.foto?`<img src="${fotoUrl(p.foto)}" alt="" loading="${i<5?'eager':'lazy'}" draggable="false">`:ico('prod',56,'stroke:var(--ink-3);stroke-width:1.4')}</span><span class="pie"><span class="t">${esc(p.nombre||s.codigo)}</span><span class="s">${esc(p.marca||unidades(s.cant))}</span></span><b class="q">${s.cant}</b></button>`; }).join('')}<div class="df-acts" id="dfActs"><button type="button" class="sw-b gris" data-dfact="mover">Mover</button><button type="button" class="sw-b rojo" data-dfact="borrar">Borrar</button></div><span class="df-pos" id="dfPos" aria-live="polite"></span></div>`; }
