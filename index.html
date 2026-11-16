@@ -471,7 +471,7 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611161934';
+const APP_VERSION='202611161936';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -996,7 +996,7 @@ caja:{ html(){
   return `${cabecera(iconBtn(`data-go="etiqueta" data-id="${esc(V.p.id)}"`,'tag','Etiqueta')+iconBtn(`data-go="nuevaCaja" data-id="${esc(V.p.id)}"`,'edit','Editar caja'))}
   <p class="kicker">${esc(c.lugar||'Sin lugar')}</p><h1 class="md">${esc(c.nombre)}</h1>
   ${items.length?`<p class="stat-line"><b>${nprod}</b> ${nprod===1?'producto':'productos'}, <b>${roll('caja-'+V.p.id,unid)}</b> ${unid===1?'unidad':'unidades'}</p>
-  <p class="help" style="margin-top:6px">${vista==='fichas'?'Deslizá hacia arriba o abajo para recorrer los productos. Tocá el de adelante para abrirlo.':'Deslizá un producto a la izquierda para moverlo o borrarlo.'}</p>
+  <p class="help" style="margin-top:6px">${vista==='fichas'?'Bajá el dedo para ir más profundo en el fichero; subilo para volver. Tocá la ficha de adelante para abrirla.':'Deslizá un producto a la izquierda para moverlo o borrarlo.'}</p>
   <div class="acts3">${[['sacar','Sacar','out'],['mover','Mover','arrow'],['devolver','Devolver','user']].map(([k,l,ic])=>`<button class="accion" data-mov="${k}" data-desde="${esc(V.p.id)}"><span class="bub">${ico(ic,18,'stroke:#fff')}</span>${l}</button>`).join('')}</div>`:''}
   ${items.length>1?`<div class="seg" role="tablist" aria-label="Cómo ver los productos" style="margin-top:16px">${[['fichas','Fichas'],['lista','Lista']].map(([k,l])=>`<button role="tab" data-cvista="${k}" aria-selected="${vista===k}">${l}</button>`).join('')}</div>`:''}
   ${items.length&&vista==='fichas'?mazoHTML(items.sort((a,b)=>prodNom(a.codigo).localeCompare(prodNom(b.codigo),'es'))):''}
@@ -1694,7 +1694,7 @@ function iniciarMazo(){
   let drag=null;
   df.addEventListener('pointerdown',e=>{ if(e.button>0) return; cancelAnimationFrame(raf); drag={y0:e.clientY,p0:p,mov:false,h:[[e.timeStamp,p]],id:e.pointerId,card:e.target.closest('.df-c')}; });
   df.addEventListener('pointermove',e=>{ if(!drag||e.pointerId!==drag.id) return; const dy=e.clientY-drag.y0; if(!drag.mov){ if(Math.abs(dy)<6) return; drag.mov=true; df.classList.add('arrastra'); try{ df.setPointerCapture(drag.id); }catch(_){} }
-    let np=drag.p0-dy/120; if(np<0) np=np*.3; if(np>n-1) np=n-1+(np-(n-1))*.3; p=np; drag.h.push([e.timeStamp,p]); if(drag.h.length>6) drag.h.shift(); pintar(); });
+    let np=drag.p0+dy/120; // bajar el dedo = ir más profundo en el fichero (la de adelante cae con el dedo) if(np<0) np=np*.3; if(np>n-1) np=n-1+(np-(n-1))*.3; p=np; drag.h.push([e.timeStamp,p]); if(drag.h.length>6) drag.h.shift(); pintar(); });
   const fin=e=>{ if(!drag||e.pointerId!==drag.id) return; const d=drag; drag=null; df.classList.remove('arrastra');
     if(!d.mov){ if(d.card){ const i=+d.card.dataset.i; if(i===Math.round(p)) go('producto',{codigo:d.card.dataset.codigo}); else { vel=0; ir(i); } } return; }
     const h=d.h, v=h.length>1?(h[h.length-1][1]-h[0][1])/Math.max(1,h[h.length-1][0]-h[0][0])*1000:0; // fichas por segundo
