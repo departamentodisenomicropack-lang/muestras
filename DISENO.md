@@ -114,3 +114,14 @@ Todo producto se muestra igual, venga del código de barras o se escriba a mano 
 - **Sacar, Mover y Devolver:** desde la ficha del producto, en una hoja; para varios productos, desde la caja.
 - **Foto oficial por defecto:** si el código trae foto de tienda se usa sola; solo si no hay se pide la del estudio.
 - **Deslizar a la izquierda** (como en iPhone): en Por completar, *No completar* / *Borrar*; en las cajas y en los resultados de búsqueda, *Mover* / *Borrar* (borra solo de esa caja, con confirmación). Deslizar hasta el final hace la acción principal.
+
+## Motion (desde el prototipo de Framer, nov 2026)
+Un solo sistema de movimiento, sin librerías (módulo "Motion" en index.html):
+- **Resortes** generados en JS y aplicados como `linear()` en CSS: `--spring` (suave, sin rebote) para casi todo, `--snappy` para respuestas rápidas, `--bouncy` solo para lo físico (el visor que engancha al leer).
+- **Las cosas viajan, no aparecen**: el botón "Agregar producto" se agranda hasta ser el escáner y vuelve a achicarse al cerrar; la fila de una caja se abre hasta ser su página y se cierra sobre su fila.
+- **Fotos que vuelan**: las miniaturas escaneadas viajan hasta el ¡Listo! (`data-flip="t-<código>"`). Las líneas del escáner se reacomodan solas cuando entra una nueva (`data-flip="l-<código>"`).
+- **Números que ruedan**: `roll(clave, valor)` en el contador del escáner y en las unidades de cada caja; recuerdan el último valor visto, así al volver al inicio el número de la caja sube.
+- **Textos que se transforman**: `morphText()` en el botón de guardar del escáner.
+- **Deslizar con física**: decide por recorrido o velocidad del dedo; los botones aparecen de a poco; "No completar" se puede deshacer.
+- **Sobriedad**: sin confeti en el ¡Listo! (es algo frecuente); el adorno queda para lo raro.
+- Respeta "reducir movimiento" del sistema.
