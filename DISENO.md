@@ -131,3 +131,4 @@ Un solo sistema de movimiento, sin librerías (módulo "Motion" en index.html):
 - **Agregar más unidades** (ficha del producto): ya no abre el escáner. Se despliega ahí mismo un panel con la caja (las que ya lo tienen, o "Otra caja…"), la cantidad (el número rueda) y el botón "Agregar N unidades a CAJA".
 - **Orden por clase de producto** (no se muestra): cabello, maquillaje, uñas, piel, limpieza, higiene, perfumes, bucal, bebé, golosinas, snacks, bebidas, almacén, mascotas y el resto; dentro de cada clase, por nombre. Se reconoce por palabras del nombre y la marca (`CLASES` en index.html; sumar palabras ahí cuando aparezcan productos nuevos).
 - El texto que se transforma ya no usa desenfoque: en iPhone dejaba un fondo blanco dentro del botón negro.
+- **Sacar / Mover / Devolver** viven solo en la ficha de cada producto (ya no en la caja). Si entrás al producto desde una caja, esa caja queda elegida como origen.

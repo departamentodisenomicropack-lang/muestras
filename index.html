@@ -478,7 +478,7 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611162000';
+const APP_VERSION='202611162003';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -836,7 +836,7 @@ function selectorCaja(campo,valor,{excepto,label}={}){
 }
 const fotoMini=p=>p&&p.foto?`<img src="${fotoUrl(p.foto)}" alt="" loading="lazy">`:ico('prod',20,'stroke:var(--ink-3);stroke-width:2');
 function filaProd(s,sub){ const p=S.productos.get(s.codigo)||{};
-  return `<div class="sw" data-sw="caja" data-full="borrar" data-codigo="${esc(s.codigo)}" data-caja="${esc(s.caja)}"><div class="sw-acts"><button type="button" class="sw-b gris" data-swact="mover">Mover</button><button type="button" class="sw-b rojo" data-swact="borrar">Borrar</button></div><button class="row-p sw-fr" data-go="producto" data-codigo="${esc(s.codigo)}"><span class="ph" data-flip="t-${esc(s.codigo)}">${fotoMini(p)}</span><span class="tx"><b>${esc(p.nombre||s.codigo)}</b>${sub?`<span>${sub}</span>`:''}</span><span class="qty">${s.cant}</span></button></div>`; }
+  return `<div class="sw" data-sw="caja" data-full="borrar" data-codigo="${esc(s.codigo)}" data-caja="${esc(s.caja)}"><div class="sw-acts"><button type="button" class="sw-b gris" data-swact="mover">Mover</button><button type="button" class="sw-b rojo" data-swact="borrar">Borrar</button></div><button class="row-p sw-fr" data-go="producto" data-codigo="${esc(s.codigo)}" data-desde="${esc(s.caja)}"><span class="ph" data-flip="t-${esc(s.codigo)}">${fotoMini(p)}</span><span class="tx"><b>${esc(p.nombre||s.codigo)}</b>${sub?`<span>${sub}</span>`:''}</span><span class="qty">${s.cant}</span></button></div>`; }
 function grupoCaja(id,filas,{sub}={}){ const c=S.cajas.get(id)||{};
   return `<div class="grp"><button class="grp-h" data-go="caja" data-id="${esc(id)}"><b>${esc(cajaNom(id))}</b><span>${esc(c.lugar||'')}</span></button>${filas.map(s=>filaProd(s,sub?sub(s):esc(S.productos.get(s.codigo)?.marca||''))).join('')}</div>`; }
 const fab=(intent,texto)=>`${scanLabel(intent,'fab',`<span class="shape">${shape(GALLETA,44,'#a35e47')}<svg class="ico" width="20" height="20" viewBox="0 0 24 24"><path d="${I.scan}"/></svg></span>${esc(texto)}`)}`;
@@ -1013,7 +1013,7 @@ caja:{ html(){
   <p class="kicker">${esc(c.lugar||'Sin lugar')}</p><h1 class="md">${esc(c.nombre)}</h1>
   ${items.length?`<p class="stat-line"><b>${nprod}</b> ${nprod===1?'producto':'productos'}, <b>${roll('caja-'+V.p.id,unid)}</b> ${unid===1?'unidad':'unidades'}</p>
   <p class="help" style="margin-top:6px">${items.length>1?(vista==='fichas'?'Bajá el dedo para pasar a la siguiente ficha. Deslizá a la izquierda para moverla o borrarla.':'Deslizá un producto a la izquierda para moverlo o borrarlo.'):'Deslizá el producto a la izquierda para moverlo o borrarlo.'}</p>
-  <div class="acts3">${[['sacar','Sacar','out'],['mover','Mover','arrow'],['devolver','Devolver','user']].map(([k,l,ic])=>`<button class="accion" data-mov="${k}" data-desde="${esc(V.p.id)}"><span class="bub">${ico(ic,18,'stroke:#fff')}</span>${l}</button>`).join('')}</div>`:''}
+`:''}
   ${items.length>1?`<div class="seg" role="tablist" aria-label="Cómo ver los productos" style="margin-top:16px">${[['fichas','Fichero'],['lista','Lista']].map(([k,l])=>`<button role="tab" data-cvista="${k}" aria-selected="${vista===k}">${l}</button>`).join('')}</div>`:''}
   ${items.length&&vista==='fichas'?mazoHTML(ordenClase(items)):''}
   ${items.length&&vista!=='fichas'?`<div class="grp" style="margin-top:14px">${ordenClase(items).map(s=>filaProd(s,esc(S.productos.get(s.codigo)?.marca||''))).join('')}</div>`:''}
@@ -1775,7 +1775,7 @@ function iniciarMazo(){
       if(sx<-w*.6||(v<-1.2&&sx<-AW*.5)){ ponerX(-w,true); vibrar(15); setTimeout(()=>hacer('borrar'),140); return; }
       if(v>.3) { ponerX(0,true); return; }
       if(sx<-AW*.45||(v<-.35&&sx<-20)) ponerX(-AW,true); else ponerX(0,true); return; }
-    if(!d.mov){ if(sx){ cerrarSw(); return; } if(d.card){ const i=+d.card.dataset.i; if(i===Math.round(p)) go('producto',{codigo:d.card.dataset.codigo}); else { vel=0; ir(i); } } return; }
+    if(!d.mov){ if(sx){ cerrarSw(); return; } if(d.card){ const i=+d.card.dataset.i; if(i===Math.round(p)) go('producto',{codigo:d.card.dataset.codigo,desde:V.p.id}); else { vel=0; ir(i); } } return; }
     const h=d.h, v=h.length>1?(h[h.length-1][1]-h[0][1])/Math.max(1,h[h.length-1][0]-h[0][0])*1000:0; // fichas por segundo
     vel=v; ir(Math.round(p+v*.18)); };
   df.addEventListener('pointerup',fin); df.addEventListener('pointercancel',fin);
@@ -1806,7 +1806,7 @@ document.addEventListener('click',e=>{
   const mv=e.target.closest('[data-mov]'); if(mv){ e.preventDefault(); if(mv.disabled) return; if(V.view==='camara'){ salir(); V=pila.pop()||{view:'inicio',p:{},f:{}}; } const args={tipo:mv.dataset.mov,codigo:mv.dataset.codigo,caja:mv.dataset.caja,desde:mv.dataset.desde};
     if(mv.classList.contains('fab')&&args.tipo==='ingresar'){ abrirMorph(mv,'#000',()=>go('mov',args)); return; }
     go('mov',args); return; }
-  const hj=e.target.closest('[data-hoja]'); if(hj){ V.f.hoja={tipo:hj.dataset.hoja,cant:1}; const y=window.scrollY; render(); window.scrollTo(0,y); return; }
+  const hj=e.target.closest('[data-hoja]'); if(hj){ V.f.hoja={tipo:hj.dataset.hoja,cant:1,desde:V.view==='producto'?V.p.desde:undefined}; const y=window.scrollY; render(); window.scrollTo(0,y); return; }
   if(V.f.hoja){ const y=window.scrollY, re=()=>{ render(); window.scrollTo(0,y); };
     const hd=e.target.closest('[data-hdesde]'); if(hd){ V.f.hoja.desde=hd.dataset.hdesde; if(V.f.hoja.hacia===hd.dataset.hdesde) V.f.hoja.hacia=''; re(); return; }
     const hm=e.target.closest('[data-hmotivo]'); if(hm){ V.f.hoja.motivo=hm.dataset.hmotivo; re(); return; }
@@ -1826,7 +1826,7 @@ document.addEventListener('click',e=>{
   }
   const sc=e.target.closest('[data-scan]'); if(sc){ e.preventDefault(); try{ scanIntent=JSON.parse(sc.dataset.scan); }catch(_){ scanIntent={tipo:'abrir'}; } go('camara',{}); return; }
   const intent=e.target.closest('[data-intent]'); if(intent){ try{ scanIntent=JSON.parse(intent.dataset.intent); }catch(_){ scanIntent={tipo:'abrir'}; } return; }
-  const g=e.target.closest('[data-go]'); if(g){ e.preventDefault(); if(morphando) return; const d=g.dataset, args={id:d.id,codigo:d.codigo,editar:d.editar,caja:d.caja||undefined,cant:d.cant?+d.cant:undefined,apartado:d.apartado};
+  const g=e.target.closest('[data-go]'); if(g){ e.preventDefault(); if(morphando) return; const d=g.dataset, args={id:d.id,codigo:d.codigo,editar:d.editar,caja:d.caja||undefined,cant:d.cant?+d.cant:undefined,apartado:d.apartado,desde:d.desde||undefined};
     if(d.go==='caja'&&V.view==='inicio'&&g.classList.contains('item')){ abrirMorph(g,'#fff',()=>go('caja',args)); return; }
     go(d.go,args); return; }
   const a=e.target.closest('[data-act]'); if(a){ e.preventDefault(); const k=a.dataset.act; if(k==='home') home(); else ACCIONES[k]&&ACCIONES[k](a); return; }
