@@ -132,3 +132,4 @@ Un solo sistema de movimiento, sin librerías (módulo "Motion" en index.html):
 - **Orden por clase de producto** (no se muestra): cabello, maquillaje, uñas, piel, limpieza, higiene, perfumes, bucal, bebé, golosinas, snacks, bebidas, almacén, mascotas y el resto; dentro de cada clase, por nombre. Se reconoce por palabras del nombre y la marca (`CLASES` en index.html; sumar palabras ahí cuando aparezcan productos nuevos).
 - El texto que se transforma ya no usa desenfoque: en iPhone dejaba un fondo blanco dentro del botón negro.
 - **Sacar / Mover / Devolver** viven solo en la ficha de cada producto (ya no en la caja). Si entrás al producto desde una caja, esa caja queda elegida como origen.
+- Fichas del fichero agrandadas (nov 2026): 184 px de alto, foto de 156 px a la izquierda, nombre hasta 3 líneas, cantidad en círculo arriba a la derecha.
