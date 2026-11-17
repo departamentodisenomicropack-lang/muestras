@@ -76,7 +76,7 @@ function carpetaFotos_() {
   const props = PropertiesService.getScriptProperties();
   const id = props.getProperty('CARPETA_FOTOS');
   if (id) { try { return DriveApp.getFolderById(id); } catch (e) {} }
-  const f = DriveApp.createFolder('Muestras · fotos');
+  const f = DriveApp.createFolder('Stock diseño · fotos');
   props.setProperty('CARPETA_FOTOS', f.getId());
   return f;
 }
@@ -266,6 +266,57 @@ function subirFoto(base64, mime, nombre, reemplaza) {
     if (!enUso) tirarFoto_(reemplaza);
   }
   return { id: file.getId() };
+}
+
+/* ───────────── Mudanza de cuenta ───────────── */
+
+/** Correr UNA vez en la copia de la planilla, desde la cuenta nueva (Ejecutar → mudanza).
+ *  Copia a esta cuenta las fotos de los productos y los archivos de los modelos 3D,
+ *  y cambia en la planilla los enlaces viejos por los nuevos. No borra nada: los
+ *  originales quedan en la cuenta vieja como respaldo.
+ *  Si tarda mucho, se corta solo a los 5 minutos: volvé a correrla hasta que diga "Listo". */
+function mudanza() {
+  const t0 = Date.now(), yo = Session.getEffectiveUser().getEmail();
+  const props = PropertiesService.getScriptProperties();
+  if (props.getProperty('MUDANZA_DE') !== yo) {
+    // primera corrida en esta cuenta: carpetas propias, nuevas
+    props.deleteProperty('CARPETA_FOTOS'); props.deleteProperty('CARPETA_MODELOS');
+    props.setProperty('MUDANZA_DE', yo);
+  }
+  const mapa = {};   // en esta corrida: una foto usada por dos productos se copia una vez
+  let hechos = 0, fallas = 0, cortado = false;
+  function copiar(id, carpeta) {
+    if (!id) return id;
+    if (mapa[id]) return mapa[id];
+    try {
+      const f = DriveApp.getFileById(id);
+      const due = f.getOwner();
+      if (due && due.getEmail() === yo) { mapa[id] = id; return id; }   // ya es de esta cuenta
+      const c = f.makeCopy(f.getName(), carpeta);
+      c.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      mapa[id] = c.getId(); hechos++;
+      return c.getId();
+    } catch (e) { fallas++; Logger.log('No pude copiar ' + id + ': ' + e); return id; }
+  }
+  function hoja(nombre, campos, carpeta) {
+    const sh = hoja_(nombre); if (!sh) return;
+    const cols = HOJAS[nombre];
+    filas_(nombre).forEach(function (r) {
+      if (cortado) return;
+      if (Date.now() - t0 > 5 * 60 * 1000) { cortado = true; return; }
+      campos.forEach(function (c) {
+        const nuevo = copiar(r[c], carpeta);
+        if (nuevo && nuevo !== r[c]) sh.getRange(r._fila, cols.indexOf(c) + 1).setNumberFormat('@').setValue(nuevo);
+      });
+    });
+  }
+  hoja('Productos', ['foto'], carpetaFotos_());
+  if (!cortado) hoja('Modelos', ['miniatura', 'glb'], carpetaModelos_());
+  bump_();
+  const msg = (cortado ? 'Falta: volvé a correr mudanza(). ' : 'Listo. ') +
+    'Copiados ' + hechos + ' archivos' + (fallas ? ', ' + fallas + ' no se pudieron (ver registro)' : '') + '.';
+  Logger.log(msg);
+  return msg;
 }
 
 /* ───────────── Modelos 3D (desde Rhino) ───────────── */
