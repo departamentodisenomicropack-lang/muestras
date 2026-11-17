@@ -150,3 +150,4 @@ Un solo sistema de movimiento, sin librerías (módulo "Motion" en index.html):
 - Arquitectura: un único canvas fijo fuera de #app (render() nunca lo destruye); el inicio solo dibuja un escenario (#c3dStage) que el motor sigue. El motor (vendor/caja3d.js, ~500 KB) se carga cuando la app está ociosa; solo dibuja mientras hay movimiento.
 - Respaldo: sin WebGL, si falla la carga o con "reducir movimiento", el inicio vuelve a la lista de cajas anterior.
 - Fuente del motor y de las texturas en vendor/cajas3d-src/.
+- Corrección: al buscar, la caja 3D quedaba dibujada encima de los resultados. Ahora la búsqueda avisa al motor y, además, el motor esconde el canvas solo si el escenario desaparece de la pantalla.

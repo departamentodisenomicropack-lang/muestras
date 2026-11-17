@@ -535,7 +535,7 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611170900';
+const APP_VERSION='202611171108';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -1972,7 +1972,7 @@ document.addEventListener('input',e=>{
   const t=e.target; if(t.id==='cant'){ V.f.cant=t.value; return; }
   if(t.id==='h_nota'&&V.f.hoja){ V.f.hoja.nota=t.value; return; }
   const k=t.dataset&&t.dataset.f; if(!k) return; V.f[k]=t.value;
-  if(k==='q'){ $('#res').innerHTML=resultados(); }
+  if(k==='q'){ $('#res').innerHTML=resultados(); c3dSync(); }
   if(V.view==='mov'&&k==='buscar'){ const sg=$('#movSug'); if(sg) sg.innerHTML=movSug(); }
   if(k==='nombre'&&$('#fichaIn')) $('#fichaIn').innerHTML=fichaHTML(t.value);
   if(k==='nombre'&&autoPeso(V.f)){ const pe=$('#peso'); if(pe){ pe.value=V.f.peso; pe.classList.remove('falta'); } }

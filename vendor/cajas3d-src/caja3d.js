@@ -236,6 +236,8 @@ export function create(opts) {
   function frame() { const now = clock();
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     layout();
+    // si la app sacó el escenario (búsqueda, otra pantalla), el canvas se esconde
+    if (mode === 'carrusel' && (!stage || !stage.isConnected)) { if (stage) detach(); else hide(); raf = 0; return; }
     let busy = step(dt, now);
     renderer.render(scene, cam);
     raf = busy ? requestAnimationFrame(frame) : 0;
