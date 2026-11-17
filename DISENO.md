@@ -141,3 +141,12 @@ Un solo sistema de movimiento, sin librerías (módulo "Motion" en index.html):
 - Inicio: cada caja se ve desde arriba en proyección militar (sin punto de fuga): tapa terracota con el nombre, lugar y unidades; debajo, el canto de la tapa y el frente de cartón de la caja. La tapa sobresale un poco del cuerpo.
 - Al tocar: la tapa se da vuelta hacia arriba (queda parada detrás, mostrando su cara interna de cartón, como en el video de referencia), se ve el interior con fichas blancas y la cámara entra al interior hasta el fichero.
 - Volver: la vista se contrae hasta la tapa de la caja.
+
+### Cajas 3D en el inicio (Three.js)
+- El inicio muestra las cajas como un carrusel 3D real (Three.js + WebGL): caja de zapatillas de cartón corrugado con tapa articulada atrás, nombre, lugar y unidades impresos en la tapa. Punto de vista casi cenital, como las fotos de referencia.
+- Textura real: sacada de las fotos de una caja de cartón corrugado de Micropack (superficie, cara interna más clara y canto con la onda). Materiales PBR (color, relieve y rugosidad), oclusión ambiental horneada en el interior, luz de estudio con sombras suaves.
+- Deslizar: la caja sigue al dedo, se levanta y se inclina; la siguiente entra con un resorte (transición tipo Dribbble "Shoe Boxes Swipe"). Puntos debajo para saltar a una caja.
+- Tocar: la tapa se abre sobre la bisagra con un rebote, la cámara (PerspectiveCamera real) entra al interior vacío, el fondo llena la pantalla, la luz sube a blanco y aparece la pantalla de la caja. Volver hace todo al revés; al cerrar, la tapa rebota contra el borde sin atravesar la caja.
+- Arquitectura: un único canvas fijo fuera de #app (render() nunca lo destruye); el inicio solo dibuja un escenario (#c3dStage) que el motor sigue. El motor (vendor/caja3d.js, ~500 KB) se carga cuando la app está ociosa; solo dibuja mientras hay movimiento.
+- Respaldo: sin WebGL, si falla la carga o con "reducir movimiento", el inicio vuelve a la lista de cajas anterior.
+- Fuente del motor y de las texturas en vendor/cajas3d-src/.

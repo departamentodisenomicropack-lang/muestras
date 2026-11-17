@@ -465,6 +465,20 @@ body.escaneo .toast{background:#fff;color:#000}
 .ctop-esc{position:fixed;z-index:70;pointer-events:none;transform-origin:50% 50%}
 .ctop-esc .ctop{position:absolute;inset:0;margin:0}
 .ctop-blanco{position:fixed;inset:0;z-index:71;background:#fff;pointer-events:none;opacity:0}
+/* Cajas 3D (Three.js): un solo canvas fijo fuera de #app; el inicio solo pone el escenario donde se dibuja */
+#c3d{position:fixed;inset:0;width:100%;height:100%;z-index:6;pointer-events:none;visibility:hidden}
+#c3dBlanco{position:fixed;inset:0;z-index:69;background:#fff;pointer-events:none;opacity:0}
+.c3d-stage{position:relative;height:372px;margin:0 -20px;touch-action:pan-y;cursor:grab;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+.c3d-stage .cargando{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--ink-3);font-size:13px;font-weight:600}
+.c3d-stage.on .cargando{display:none}
+.c3d-pie{display:flex;flex-direction:column;align-items:center;gap:6px;margin:-6px 0 6px}
+.c3d-pie p{margin:0;font-size:13px;font-weight:600;color:var(--ink-3)}
+.c3d-pts{display:flex;gap:2px}
+.c3d-pts button{width:28px;height:28px;border:0;background:none;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.c3d-pts i{display:block;width:8px;height:8px;border-radius:999px;background:var(--line);transition:width .22s var(--spring),background .22s}
+.c3d-pts button[aria-current="true"] i{width:22px;background:var(--ink)}
+#app.c3d-entra>*{animation:c3dEntra .5s cubic-bezier(.2,0,0,1) both}
+@keyframes c3dEntra{from{opacity:0;transform:scale(1.05)}}
 /* ===== Motion (sistema del prototipo) ===== */
 .ghost{position:fixed;z-index:70;pointer-events:none;will-change:left,top,width,height}
 .ghost.vuelo{z-index:65;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgb(0 0 0/.16)}
@@ -510,6 +524,7 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
   </div>
 </div>
 <main class="app" id="app" aria-live="polite"></main>
+<canvas id="c3d" aria-hidden="true"></canvas><div id="c3dBlanco"></div>
 <nav class="nav" id="nav" aria-label="Secciones"></nav>
 <input type="file" id="cam" accept="image/*" capture="environment" class="sr" tabindex="-1" aria-hidden="true">
 <input type="file" id="gal" accept="image/*" class="sr" tabindex="-1" aria-hidden="true">
@@ -520,7 +535,7 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611162054';
+const APP_VERSION='202611170900';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -633,9 +648,9 @@ const lugares=()=>[...new Set([...S.cajas.values()].map(c=>c.lugar).filter(Boole
 /* ============ Navegación ============ */
 function salir(){ if(V.view==='camara'||V.view==='fotoCam'||V.view==='mov') detenerCamara(); }
 function go(view,p={},f={}){ salir(); pila.push(V); V={view,p,f}; render(); window.scrollTo(0,0); if(VIEWS[view].enter) VIEWS[view].enter(); }
-function back(){ const de=V; salir(); if(V.view==='ingreso') borrarBorrador(); V=pila.pop()||{view:'inicio',p:{},f:{}}; render(); window.scrollTo(0,0); if(VIEWS[V.view]&&VIEWS[V.view].reenter) VIEWS[V.view].reenter();
+function back(){ const de=V; salir(); if(V.view==='ingreso') borrarBorrador(); V=pila.pop()||{view:'inicio',p:{},f:{}}; c3dVolviendo=!!(C3D&&C3D.mode==='adentro'&&de.view==='caja'&&V.view==='inicio'); if(c3dVolviendo){ $('#c3dBlanco').style.opacity=1; } render(); window.scrollTo(0,0); if(VIEWS[V.view]&&VIEWS[V.view].reenter) VIEWS[V.view].reenter();
   if(de.view==='mov'&&de.f.tipo==='ingresar') cerrarMorph('.fab','#000');
-  else if(de.view==='caja'&&V.view==='inicio') cerrarMorph(`.ctop[data-id="${CSS.escape(de.p.id||'')}"] .cara`,'#fff','#a35e47'); }
+  else if(de.view==='caja'&&V.view==='inicio'){ if(c3dVolviendo) C3D.back(); else cerrarMorph(`.ctop[data-id="${CSS.escape(de.p.id||'')}"] .cara`,'#fff','#a35e47'); } }
 function home(){ salir(); borrarBorrador(); pila.length=0; V={view:'inicio',p:{},f:{}}; render(); window.scrollTo(0,0); }
 
 /* ============ Lectura de códigos ============ */
@@ -896,7 +911,10 @@ function cuerpoInicio(){
   return `${miNombre&&!V.f.editNombre?'':`<div class="card" style="background:var(--acc-soft)"><div class="f"><label for="minombre">¿Quién sos?</label><input class="in" id="minombre" data-f="minombre" placeholder="Tu nombre" autocomplete="given-name" value="${esc(V.f.minombre||'')}"></div><button class="btn pri" data-act="guardarNombre">Listo</button><p class="help" style="margin:0">Tu nombre queda en cada movimiento que cargues.</p></div>`}
   ${botonPorCompletar()}
   <div class="sec"><h2>Cajas</h2>${cs.length?`<span class="m">${unidades(unid)}</span>`:''}</div>
-  ${cs.length?`<div class="cajas-top">${cs.map(c=>cajaArriba(c)).join('')}</div>
+  ${cs.length?`${usar3d()?`<div id="c3dStage" class="c3d-stage${C3D?' on':''}" role="group" aria-label="Cajas. Deslizá para cambiar de caja, tocá para abrirla."><span class="cargando">Armando las cajas…</span></div>
+   <div class="c3d-pie" id="c3dPie">${c3dPie(cs)}</div>
+   <div class="sr">${cs.map(c=>`<button data-go="caja" data-id="${esc(c.id)}">Abrir ${esc(c.nombre)}</button>`).join('')}</div>`
+   :`<div class="cajas-top">${cs.map(c=>cajaArriba(c)).join('')}</div>`}
    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><button class="link acc" data-go="nuevaCaja">+ Nueva caja</button><button class="link acc" data-go="productos">Todos los productos</button></div>`
    :`<div class="empty"><b>Todavía no hay cajas</b><p>Creá la primera, imprimí su etiqueta y pegala en la caja o el estante.</p><button class="btn pri big" data-go="nuevaCaja">${ico('plus',20)}Crear la primera caja</button></div>`}
   ${movs.length?`<div class="sec"><h2>Actividad</h2><button class="link acc" style="padding:0" data-go="actividad">Ver toda</button></div><ol class="feed">${movs.map(textoMov).join('')}</ol>`:''}
@@ -1798,6 +1816,44 @@ function cajaArriba(c){ const u=stockEn(c.id).reduce((a,s)=>a+s.cant,0);
   return `<button type="button" class="ctop" data-go="caja" data-id="${esc(c.id)}" aria-label="${esc(c.nombre)}, ${esc(c.lugar||'sin lugar')}, ${u} ${u===1?'unidad':'unidades'}">
    <span class="cuerpo" aria-hidden="true"><span class="dentro"><i></i><i></i><i></i></span></span>
    <span class="tapa" aria-hidden="true"><span class="cara"><span class="nom">${esc(c.nombre)}</span><svg class="sello" viewBox="0 0 100 100"><path d="${GALLETA}" fill="#f6ece8"/></svg><span class="lug">${esc(c.lugar||'Sin lugar')}</span><span class="uni"><b>${roll('caja-'+c.id,u)}</b><span>${u===1?'unidad':'unidades'}</span></span></span><span class="reves"></span></span></button>`; }
+// ===== Cajas 3D =====
+let C3D=null, c3dEstado='nada', c3dIdx=0, c3dFirma='', c3dVolviendo=false, c3dGL=null;
+function usar3d(){ if(RM||c3dEstado==='error') return false;
+  if(c3dGL==null){ try{ const c=document.createElement('canvas'); c3dGL=!!(c.getContext('webgl2')||c.getContext('webgl')); }catch(e){ c3dGL=false; } }
+  return c3dGL; }
+const uniCaja=id=>stockEn(id).reduce((a,s)=>a+s.cant,0);
+function c3dPie(cs){ const i=Math.min(c3dIdx,cs.length-1);
+  return `<p>Deslizá para cambiar de caja. Tocá una para abrirla.</p>${cs.length>1?`<div class="c3d-pts">${cs.map((c,k)=>`<button type="button" data-c3d="${k}" aria-label="${esc(c.nombre)}" aria-current="${k===i}"><i></i></button>`).join('')}</div>`:''}`; }
+function cargarC3D(){ if(c3dEstado!=='nada') return; c3dEstado='cargando';
+  const s=document.createElement('script'); s.src='vendor/caja3d.js?v='+APP_VERSION;
+  s.onload=()=>{ const f=document.fonts&&document.fonts.load?Promise.all([document.fonts.load('900 60px Archivo'),document.fonts.load('600 30px Archivo')]):Promise.resolve();
+    f.catch(()=>{}).then(()=>{ c3dEstado='listo'; c3dSync(); }); };
+  s.onerror=()=>{ c3dEstado='error'; if(V.view==='inicio') render(); };
+  document.head.appendChild(s); }
+function c3dSync(){
+  const st=$('#c3dStage');
+  if(!st){ if(C3D) C3D.detach(); return; }
+  if(c3dEstado==='nada'){ (window.requestIdleCallback||setTimeout)(cargarC3D,{timeout:400}); return; }
+  if(c3dEstado!=='listo') return;
+  const ap=$('#app'), bl=$('#c3dBlanco');
+  if(!C3D){ try{ const T='vendor/cajas3d/';
+    C3D=Caja3D.create({ canvas:$('#c3d'), font:'Archivo, -apple-system, sans-serif',
+      tex:{albedo:T+'kraft_albedo.jpg',normal:T+'kraft_normal.jpg',rough:T+'kraft_rough.jpg',inner:T+'kraft_inner.jpg',edge:T+'flute_edge.jpg'},
+      onIndex:i=>{ c3dIdx=i; vibrar(5); const p=$('#c3dPie'); if(p) p.innerHTML=c3dPie(cajasOrden()); },
+      onStart:()=>{ morphando=true; vibrar(8); },
+      onProgress:(e,m)=>{ ap.style.opacity=Math.max(0,1-e*3); bl.style.opacity=Math.max(0,Math.min(1,(e-.86)/.14)); },
+      onArrive:i=>{ const c=cajasOrden()[i]; ap.style.opacity=''; morphando=false;
+        if(c) go('caja',{id:c.id});
+        ap.classList.add('c3d-entra'); setTimeout(()=>ap.classList.remove('c3d-entra'),600);
+        C3D.hide(); bl.style.opacity=0; bl.animate([{opacity:1},{opacity:0}],{duration:320,easing:'ease-out'}); },
+      onBack:()=>{ ap.style.opacity=''; bl.style.opacity=0; c3dVolviendo=false; morphando=false; }
+    }); }catch(e){ console.warn('3D',e); c3dEstado='error'; C3D=null; render(); return; } }
+  const cs=cajasOrden(); c3dIdx=Math.max(0,Math.min(c3dIdx,cs.length-1));
+  const firma=cs.map(c=>[c.id,c.nombre,c.lugar,uniCaja(c.id)].join('|')).join(';');
+  if(firma!==c3dFirma){ c3dFirma=firma; C3D.setBoxes(cs.map(c=>({id:c.id,nombre:c.nombre,lugar:c.lugar||'',unidades:uniCaja(c.id)})),c3dIdx); }
+  if(C3D.mode==='adentro'&&!c3dVolviendo) C3D.reset();
+  st.classList.add('on'); C3D.attach(st);
+}
 function abrirCaja(btn,luego){
   if(RM||morphando){ luego(); return; } morphando=true;
   const r=btn.getBoundingClientRect();
@@ -1867,11 +1923,13 @@ function render(){
   const flipPrev=vueloCapturar();
   $('#app').innerHTML=banner+v.html();
   requestAnimationFrame(()=>{ if($('#df')) iniciarMazo(); vueloAnimar(flipPrev); animarRolls(); });
+  c3dSync();
   $('#nav').hidden=true;
   const osc=V.view==='mov'&&V.f.tipo==='ingresar'; document.body.classList.toggle('escaneo',osc);
   const tc=document.querySelector('meta[name="theme-color"]'); if(tc) tc.content=osc?'#000000':'#ffffff';
 }
 document.addEventListener('click',e=>{
+  const pt=e.target.closest('[data-c3d]'); if(pt){ if(C3D) C3D.go(Number(pt.dataset.c3d)); return; }
   const fl=e.target.closest('[data-filtro]'); if(fl){ V.f.filtro=fl.dataset.filtro; render(); return; }
   if(V.f.sumar){ const sc=e.target.closest('[data-scaja]'); if(sc){ const y=window.scrollY; V.f.sumar.caja=sc.dataset.scaja; render(); window.scrollTo(0,y); return; }
     const sn=e.target.closest('[data-scant]'); if(sn){ const f=V.f.sumar; f.cant=Math.max(1,Math.min(999,f.cant+Number(sn.dataset.scant))); const b=$('.sumar .cant-big b'); if(b){ b.innerHTML=roll('sumar',f.cant); animarRolls(); }
