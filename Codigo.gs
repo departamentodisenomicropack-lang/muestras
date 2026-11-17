@@ -18,6 +18,10 @@ const HOJAS = {
   Stock:       ['codigo', 'caja', 'cant', 'at'],
   Movimientos: ['at', 'tipo', 'codigo', 'nombre', 'desde', 'hacia', 'cant', 'nota', 'por'],
   Prestamos:   ['id', 'codigo', 'nombre', 'cant', 'desde', 'a', 'hasta', 'nota', 'por', 'at', 'devuelto', 'vuelveA', 'devueltoPor'],
+  // Modelos 3D de productos. Los sube el sistema integral de Rhino (herramienta Stock diseño).
+  // El .3dm vive en el servidor (\\192.168.80.72\Public2TB\Stock diseño\Modelos); acá van los datos,
+  // la miniatura y una copia liviana para verlo en el celular (.glb), las dos en Drive.
+  Modelos:     ['codigo', 'nombre', 'marca', 'alto', 'ancho', 'prof', 'archivo', 'miniatura', 'glb', 'creado', 'actualizado', 'por'],
 };
 const MOVS_A_ENVIAR = 400;   // los últimos N movimientos que viajan a la app
 
@@ -35,7 +39,7 @@ function doGet(e) {
 function doPost(e) {
   try {
     const body = JSON.parse(e.postData.contents);
-    const fns = { getData, guardarCaja, guardarProducto, ingresar, mover, transaccion, devolverPrestamo, subirFoto, historial, buscarEAN, fotoDeTienda, diagTiendas, ponerFotoOficial, fotosPendientes };
+    const fns = { getData, registrarModelo, glbModelo, datosProducto, guardarCaja, guardarProducto, ingresar, mover, transaccion, devolverPrestamo, subirFoto, historial, buscarEAN, fotoDeTienda, diagTiendas, ponerFotoOficial, fotosPendientes };
     const fn = fns[body.fn];
     if (!fn) throw new Error('Función desconocida: ' + body.fn);
     return json_(fn.apply(null, body.args || []));
@@ -82,7 +86,7 @@ function carpetaFotos_() {
 function hoja_(nombre) {
   const ss = SpreadsheetApp.getActive();
   let sh = ss.getSheetByName(nombre);
-  if (!sh && nombre === 'Prestamos') {          // hojas nuevas se crean solas
+  if (!sh && (nombre === 'Prestamos' || nombre === 'Modelos')) {          // hojas nuevas se crean solas
     sh = ss.insertSheet(nombre);
     const cols = HOJAS[nombre];
     sh.getRange(1, 1, 1, cols.length).setValues([cols]).setFontWeight('bold');
@@ -116,6 +120,7 @@ function getData() {
     stock: filas_('Stock').map(function (s) { return { codigo: s.codigo, caja: s.caja, cant: Number(s.cant) || 0, at: Number(s.at) || 0 }; }),
     movs: movs.slice(-MOVS_A_ENVIAR).reverse().map(function (m) { const x = limpiar_(m); x.at = Number(x.at) || 0; x.cant = Number(x.cant) || 0; return x; }),
     salidas: ultimasSalidas_(movs),
+    modelos: filas_('Modelos').map(limpiar_),
     prestamos: filas_('Prestamos').filter(function (p) { return !p.devuelto; }).map(function (p) { const x = limpiar_(p); x.cant = Number(x.cant) || 0; x.at = Number(x.at) || 0; return x; }),
   };
 }
@@ -261,6 +266,66 @@ function subirFoto(base64, mime, nombre, reemplaza) {
     if (!enUso) tirarFoto_(reemplaza);
   }
   return { id: file.getId() };
+}
+
+/* ───────────── Modelos 3D (desde Rhino) ───────────── */
+
+function carpetaModelos_() {
+  const props = PropertiesService.getScriptProperties();
+  const id = props.getProperty('CARPETA_MODELOS');
+  if (id) { try { return DriveApp.getFolderById(id); } catch (e) {} }
+  const f = DriveApp.createFolder('Stock diseño · modelos 3D');
+  props.setProperty('CARPETA_MODELOS', f.getId());
+  return f;
+}
+
+function archivoModelo_(base64, mime, nombre) {
+  if (!base64) return '';
+  const bytes = Utilities.base64Decode(String(base64));
+  if (bytes.length > 25 * 1024 * 1024) throw new Error('El archivo es muy pesado.');
+  const file = carpetaModelos_().createFile(Utilities.newBlob(bytes, mime, nombre));
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  return file.getId();
+}
+
+/** d = {codigo, nombre, marca, alto, ancho, prof, archivo, por}; png y glb en base64 (opcionales).
+ *  Si el código ya tenía modelo, se actualiza la fila (las versiones viejas quedan en Drive). */
+function registrarModelo(d, png, glb) {
+  d = d || {};
+  const codigo = texto_(d.codigo, 40);
+  if (!codigo) throw new Error('Falta el código.');
+  const mini = archivoModelo_(png, 'image/png', codigo + '.png');
+  const web = archivoModelo_(glb, 'model/gltf-binary', codigo + '.glb');
+  return conCandado_(function () {
+    const filas = filas_('Modelos');
+    const ya = filas.filter(function (m) { return m.codigo === codigo; })[0];
+    const ahora = String(Date.now());
+    const o = {
+      codigo: codigo, nombre: texto_(d.nombre, 120), marca: texto_(d.marca, 80),
+      alto: texto_(d.alto, 12), ancho: texto_(d.ancho, 12), prof: texto_(d.prof, 12),
+      archivo: texto_(d.archivo, 300),
+      miniatura: mini || (ya ? ya.miniatura : ''), glb: web || (ya ? ya.glb : ''),
+      creado: ya ? ya.creado : ahora, actualizado: ahora, por: texto_(d.por, 60),
+    };
+    escribir_('Modelos', o, ya ? ya._fila : null);
+    return { ok: true, codigo: codigo };
+  });
+}
+
+/** Nombre y marca para un código: primero los productos cargados en la app, si no las tiendas. */
+function datosProducto(codigo) {
+  codigo = texto_(codigo, 40);
+  const p = filas_('Productos').filter(function (x) { return x.codigo === codigo; })[0];
+  if (p && p.nombre) return { nombre: p.nombre, marca: p.marca, alto: p.alto, ancho: p.ancho, prof: p.prof, fuente: 'app' };
+  const r = buscarEAN(codigo);
+  return r ? { nombre: r.nombre || '', marca: r.marca || '', fuente: 'tiendas' } : null;
+}
+
+/** El .glb en base64, para el visor 3D de la app (Drive no deja leerlo directo desde la página). */
+function glbModelo(id) {
+  const f = DriveApp.getFileById(String(id));
+  if (!/\.glb$/i.test(f.getName())) throw new Error('No es un modelo.');
+  return { b64: Utilities.base64Encode(f.getBlob().getBytes()) };
 }
 
 /** Manda a la papelera de Drive una foto, solo si está en la carpeta de fotos de la app.

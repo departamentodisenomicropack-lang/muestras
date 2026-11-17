@@ -151,3 +151,9 @@ Un solo sistema de movimiento, sin librerías (módulo "Motion" en index.html):
 - Respaldo: sin WebGL, si falla la carga o con "reducir movimiento", el inicio vuelve a la lista de cajas anterior.
 - Fuente del motor y de las texturas en vendor/cajas3d-src/.
 - Corrección: al buscar, la caja 3D quedaba dibujada encima de los resultados. Ahora la búsqueda avisa al motor y, además, el motor esconde el canvas solo si el escenario desaparece de la pantalla.
+
+### Modelos 3D (integración con Rhino)
+- Los productos modelados se guardan desde el sistema integral de Rhino (herramienta **Stock diseño**) en `\\192.168.80.72\Public2TB\Stock diseño` (Modelos, Miniaturas, Web, catalogo.json). La llave es el código de barras, el mismo que lee la app.
+- El sistema sube a la app (hoja **Modelos** de la planilla, carpeta de Drive "Stock diseño · modelos 3D") la miniatura, las medidas, la ruta del .3dm y una copia .glb. Si no hay internet queda pendiente y se reintenta.
+- En la app: botón "Modelos 3D" en el inicio, lista de modelos, ficha con visor 3D (se gira con el dedo, mismo motor Three.js de las cajas), ruta del archivo para copiar, y bloque "Modelo 3D" en la ficha del producto cuando existe. La búsqueda también encuentra modelos.
+- Backend: `Codigo.gs` suma la hoja Modelos y las funciones registrarModelo, glbModelo y datosProducto. Hay que pegarlo en Apps Script y publicar una versión nueva de la implementación.
