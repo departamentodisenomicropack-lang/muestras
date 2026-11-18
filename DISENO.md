@@ -156,8 +156,9 @@ Un solo sistema de movimiento, sin librerías (módulo "Motion" en index.html):
 - Los productos modelados se guardan desde el sistema integral de Rhino (herramienta **Stock diseño**) en `\\192.168.80.72\Public2TB\Stock diseño` (Modelos, Miniaturas, Web, catalogo.json). La llave es el código de barras, el mismo que lee la app.
 - El sistema sube a la app (hoja **Modelos** de la planilla, carpeta de Drive "Stock diseño · modelos 3D") la miniatura, las medidas, la ruta del .3dm y una copia .glb. Si no hay internet queda pendiente y se reintenta.
 - En la app: botón "Modelos 3D" en el inicio, lista de modelos, ficha con visor 3D (se gira con el dedo, mismo motor Three.js de las cajas), ruta del archivo para copiar, y bloque "Modelo 3D" en la ficha del producto cuando existe. La búsqueda también encuentra modelos.
-- Backend: `Codigo.gs` suma la hoja Modelos y las funciones registrarModelo, glbModelo y datosProducto. Hay que pegarlo en Apps Script y publicar una versión nueva de la implementación.
+- Backend: `Codigo.gs` suma la hoja Modelos y las funciones registrarModelo, borrarModelo (Eliminar desde Rhino, sistema integral v2.0.33: saca la fila, no borra archivos de Drive), glbModelo y datosProducto. Hay que pegarlo en Apps Script y publicar una versión nueva de la implementación.
 
 ### Mudanza a la cuenta de Diseño (17/11/2026)
 - Planilla, Apps Script y Drive pasaron a la cuenta departamentodisenomicropack (copia de la planilla + función mudanza() que copió fotos y modelos a su Drive). La planilla vieja de la cuenta personal queda como respaldo.
 - API nueva: AKfycbxd5GjM… (index.html y sistema integral de Rhino v2.0.29).
+- 17/11/2026: el repo pasó a la cuenta de GitHub de Diseño (departamentodisenomicropack-lang/muestras), junto a Brief POP (pedido).

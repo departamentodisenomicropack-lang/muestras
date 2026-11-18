@@ -39,7 +39,7 @@ function doGet(e) {
 function doPost(e) {
   try {
     const body = JSON.parse(e.postData.contents);
-    const fns = { getData, registrarModelo, glbModelo, datosProducto, guardarCaja, guardarProducto, ingresar, mover, transaccion, devolverPrestamo, subirFoto, historial, buscarEAN, fotoDeTienda, diagTiendas, ponerFotoOficial, fotosPendientes };
+    const fns = { getData, registrarModelo, borrarModelo, glbModelo, datosProducto, guardarCaja, guardarProducto, ingresar, mover, transaccion, devolverPrestamo, subirFoto, historial, buscarEAN, fotoDeTienda, diagTiendas, ponerFotoOficial, fotosPendientes };
     const fn = fns[body.fn];
     if (!fn) throw new Error('Función desconocida: ' + body.fn);
     return json_(fn.apply(null, body.args || []));
@@ -373,6 +373,18 @@ function datosProducto(codigo) {
 }
 
 /** El .glb en base64, para el visor 3D de la app (Drive no deja leerlo directo desde la página). */
+/** Saca un modelo de la hoja Modelos (lo usa "Eliminar" del sistema integral).
+ *  No borra archivos de Drive: solo la fila. */
+function borrarModelo(codigo) {
+  codigo = texto_(codigo, 40);
+  return conCandado_(function () {
+    const sh = hoja_('Modelos');
+    const m = filas_('Modelos').filter(function (x) { return x.codigo === codigo; })[0];
+    if (m) { sh.deleteRow(m._fila); bump_(); }
+    return { ok: true, estaba: !!m };
+  });
+}
+
 function glbModelo(id) {
   const f = DriveApp.getFileById(String(id));
   if (!/\.glb$/i.test(f.getName())) throw new Error('No es un modelo.');
