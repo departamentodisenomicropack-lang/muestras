@@ -552,7 +552,7 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611172037';
+const APP_VERSION='202611172224';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -635,7 +635,7 @@ function overlay(html){ if(!html){ $('#overlay').hidden=true; return; } $('#over
 
 /* ============ Configuración ============ */
 // URL del Apps Script publicado como app web (Implementar > Nueva implementación > App web).
-const API='https://script.google.com/macros/s/AKfycbyCM_if8jlDnu-uyoLfpBh2RNAZ0F3henSJqD3sky73W-YyrZLRjg6Rd8r5cK9P-b4A/exec';
+const API='https://script.google.com/macros/s/AKfycbxd5GjM-h6RSbQG8glTDNrD8MxAxIspODT1Wj7uERccNXNb0hMMBxVgbz9edsR7oEQN/exec';
 // Dónde está publicado el catálogo de productos (GitHub Pages).
 const CATALOGO_URL='https://manuelghiglia-cloud.github.io/muestras/catalogo/';
 const IN_GAS=typeof google!=='undefined'&&google.script&&google.script.run;
