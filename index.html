@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Stock diseño</title>
+<title>MPK Diseño</title>
 <meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Stock diseño">
+<meta name="apple-mobile-web-app-title" content="MPK Diseño">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
@@ -303,7 +303,9 @@ textarea.in{height:auto;min-height:80px;padding:12px 16px}
 .ola{animation:ola 2.4s var(--spring) infinite}
 @keyframes ola{0%,100%{transform:scale(.55) rotate(0deg)}40%{transform:scale(1) rotate(90deg)}70%{transform:scale(1) rotate(90deg)}}
 .sp-t2{margin:0;font:900 35px/1 var(--f);font-stretch:125%;letter-spacing:-.02em;text-align:center;color:#000}
-.sp-k2{margin:8px 0 0;font:600 15px var(--f);color:var(--ink-3);text-align:center}
+.sp-k2{margin:0;font:700 11px var(--f);letter-spacing:.14em;color:var(--acc-ink);text-align:center}
+.sp-lock{display:flex;flex-direction:column;align-items:center;gap:6px}
+.sp-mk{width:44px;height:44px;color:#000;margin-bottom:8px}
 .sp-in.d .sp-msg{min-height:20px;font-size:14px}
 .sp-in.d .sp-re{max-width:320px}
 /* Encabezado tipo Brief POP */
@@ -535,7 +537,7 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 <div id="splash" role="status" aria-live="polite">
   <div class="sp-in d">
     <div class="sp-grid" id="spGrid" aria-hidden="true"></div>
-    <div><h1 class="sp-t2">STOCK DISEÑO</h1><p class="sp-k2">Micropack</p></div>
+    <div class="sp-lock"><svg class="sp-mk" viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5,13 L5,5 L13,5"/><path d="M19,5 L27,5 L27,13"/><path d="M27,19 L27,27 L19,27"/><path d="M13,27 L5,27 L5,19"/></g><circle cx="16" cy="16" r="2.5" fill="currentColor"/></svg><p class="sp-k2">MPK</p><h1 class="sp-t2">Diseño</h1></div>
     <p class="sp-msg" id="spMsg"></p>
     <button type="button" class="btn pri sp-re" id="spRe" hidden>Reintentar</button>
   </div>
@@ -552,7 +554,7 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611172326';
+const APP_VERSION='202611180022';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -1607,7 +1609,7 @@ function dibujarEtiqueta(){
     words.forEach(w=>{ const t=(lines[lines.length-1]+' '+w).trim(); if(g.measureText(t).width>maxW&&lines[lines.length-1]) lines.push(w); else lines[lines.length-1]=t; });
     lines.slice(0,5).forEach((l,i)=>g.fillText(l,x,200+i*66));
     g.fillStyle='#464646'; g.font='700 40px Archivo, Arial, sans-serif'; g.fillText(V.p.codigo,x,H-110); }
-  g.fillStyle='#6f6d6d'; g.font='500 26px Archivo, Arial, sans-serif'; g.fillText('Escaneá con la app Stock diseño',x,H-60,maxW);
+  g.fillStyle='#6f6d6d'; g.font='500 26px Archivo, Arial, sans-serif'; g.fillText('Escaneá con la app MPK Diseño',x,H-60,maxW);
   const url=c.toDataURL('image/png'); const img=$('#lbl'); if(img) img.src=url; V.f._png=c;
 }
 async function bajarEtiqueta(){

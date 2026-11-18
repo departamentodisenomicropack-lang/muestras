@@ -1,6 +1,6 @@
 {
- "name": "Stock diseño",
- "short_name": "Stock diseño",
+ "name": "MPK Diseño",
+ "short_name": "MPK Diseño",
  "description": "Qué muestras tenemos y dónde están · Micropack Diseño",
  "start_url": "./",
  "display": "standalone",
@@ -8,7 +8,16 @@
  "theme_color": "#ffffff",
  "orientation": "portrait",
  "icons": [
-  {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
-  {"src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icon.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
  ]
 }
