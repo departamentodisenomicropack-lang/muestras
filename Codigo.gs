@@ -276,7 +276,7 @@ function subirFoto(base64, mime, nombre, reemplaza) {
  *  originales quedan en la cuenta vieja como respaldo.
  *  Si tarda mucho, se corta solo a los 5 minutos: volvé a correrla hasta que diga "Listo". */
 function mudanza() {
-  const t0 = Date.now(), yo = Session.getEffectiveUser().getEmail();
+  const t0 = Date.now(), yo = DriveApp.getRootFolder().getOwner().getEmail();   // con el permiso de Drive que ya tiene
   const props = PropertiesService.getScriptProperties();
   if (props.getProperty('MUDANZA_DE') !== yo) {
     // primera corrida en esta cuenta: carpetas propias, nuevas
