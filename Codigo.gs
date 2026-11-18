@@ -14,7 +14,8 @@
 
 const HOJAS = {
   Cajas:       ['id', 'nombre', 'lugar', 'creado', 'por'],
-  Productos:   ['codigo', 'nombre', 'marca', 'cliente', 'proyecto', 'alto', 'ancho', 'prof', 'peso', 'foto', 'creado', 'actualizado', 'por'],
+  Productos:   ['codigo', 'nombre', 'marca', 'cliente', 'proyecto', 'alto', 'ancho', 'prof', 'peso', 'foto', 'creado', 'actualizado', 'por',
+                'fotoFrente', 'fotoDerecha', 'fotoIzquierda', 'fotoDorso', 'fotoArriba', 'fotoAbajo'],   // fotos de las caras para el modelo 3D
   Stock:       ['codigo', 'caja', 'cant', 'at'],
   Movimientos: ['at', 'tipo', 'codigo', 'nombre', 'desde', 'hacia', 'cant', 'nota', 'por'],
   Prestamos:   ['id', 'codigo', 'nombre', 'cant', 'desde', 'a', 'hasta', 'nota', 'por', 'at', 'devuelto', 'vuelveA', 'devueltoPor'],
@@ -39,7 +40,7 @@ function doGet(e) {
 function doPost(e) {
   try {
     const body = JSON.parse(e.postData.contents);
-    const fns = { getData, registrarModelo, borrarModelo, glbModelo, datosProducto, guardarCaja, guardarProducto, ingresar, mover, transaccion, devolverPrestamo, subirFoto, historial, buscarEAN, fotoDeTienda, diagTiendas, ponerFotoOficial, fotosPendientes };
+    const fns = { getData, registrarModelo, borrarModelo, subirCara, glbModelo, datosProducto, guardarCaja, guardarProducto, ingresar, mover, transaccion, devolverPrestamo, subirFoto, historial, buscarEAN, fotoDeTienda, diagTiendas, ponerFotoOficial, fotosPendientes };
     const fn = fns[body.fn];
     if (!fn) throw new Error('Función desconocida: ' + body.fn);
     return json_(fn.apply(null, body.args || []));
@@ -93,7 +94,16 @@ function hoja_(nombre) {
     sh.setFrozenRows(1);
     sh.getRange(1, 1, sh.getMaxRows(), cols.length).setNumberFormat('@');
   }
+  if (sh && HOJAS[nombre] && sh.getLastColumn() < HOJAS[nombre].length) completarColumnas_(sh, HOJAS[nombre]);
   return sh;
+}
+
+/** Una hoja vieja a la que le faltan columnas nuevas (siempre se agregan al final): suma los títulos. */
+function completarColumnas_(sh, cols) {
+  if (sh.getMaxColumns() < cols.length) sh.insertColumnsAfter(sh.getMaxColumns(), cols.length - sh.getMaxColumns());
+  const desde = sh.getLastColumn() + 1;
+  sh.getRange(1, desde, 1, cols.length - desde + 1).setValues([cols.slice(desde - 1)]).setFontWeight('bold');
+  sh.getRange(1, desde, sh.getMaxRows(), cols.length - desde + 1).setNumberFormat('@');
 }
 
 function filas_(nombre) {
@@ -382,6 +392,37 @@ function borrarModelo(codigo) {
     const m = filas_('Modelos').filter(function (x) { return x.codigo === codigo; })[0];
     if (m) { sh.deleteRow(m._fila); bump_(); }
     return { ok: true, estaba: !!m };
+  });
+}
+
+/* ───────────── Fotos de las caras (para vestir el modelo 3D) ───────────── */
+
+const CARAS_ = { frente: 'fotoFrente', derecha: 'fotoDerecha', izquierda: 'fotoIzquierda', dorso: 'fotoDorso', arriba: 'fotoArriba', abajo: 'fotoAbajo' };
+
+/** Guarda la foto (ya enderezada por la app) de una cara del producto. Si esa cara ya tenía
+ *  foto, la vieja va a la papelera solo si ninguna otra columna la usa. */
+function subirCara(codigo, cara, base64) {
+  codigo = texto_(codigo, 60);
+  const col = CARAS_[cara];
+  if (!col) throw new Error('Cara desconocida: ' + cara);
+  const bytes = Utilities.base64Decode(String(base64));
+  if (bytes.length > 4 * 1024 * 1024) throw new Error('La foto es muy pesada.');
+  return conCandado_(function () {
+    const ant = filas_('Productos').filter(function (x) { return x.codigo === codigo; })[0];
+    if (!ant) throw new Error('Ese producto no está cargado.');
+    const file = carpetaFotos_().createFile(Utilities.newBlob(bytes, 'image/jpeg', 'cara-' + codigo + '-' + cara + '.jpg'));
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    const vieja = ant[col];
+    const o = {};
+    HOJAS.Productos.forEach(function (k) { o[k] = ant[k]; });
+    o[col] = file.getId();
+    o.actualizado = Date.now();
+    escribir_('Productos', o, ant._fila);
+    if (vieja && vieja !== o[col]) {
+      const enUso = filas_('Productos').some(function (p) { return HOJAS.Productos.some(function (k) { return (k === 'foto' || k.indexOf('foto') === 0) && p[k] === vieja; }); });
+      if (!enUso) tirarFoto_(vieja);
+    }
+    return getData();
   });
 }
 

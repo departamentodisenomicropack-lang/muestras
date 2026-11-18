@@ -162,3 +162,9 @@ Un solo sistema de movimiento, sin librerías (módulo "Motion" en index.html):
 - Planilla, Apps Script y Drive pasaron a la cuenta departamentodisenomicropack (copia de la planilla + función mudanza() que copió fotos y modelos a su Drive). La planilla vieja de la cuenta personal queda como respaldo.
 - API nueva: AKfycbxd5GjM… (index.html y sistema integral de Rhino v2.0.29).
 - 17/11/2026: el repo pasó a la cuenta de GitHub de Diseño (departamentodisenomicropack-lang/muestras), junto a Brief POP (pedido).
+
+### Fotos para el modelo (18/11/2026)
+- En la ficha del producto: bloque **Fotos para el modelo**. Paso a paso guiado por las 6 caras: Frente → Lateral derecho → Lateral izquierdo → Dorso → Arriba → Abajo. Cada paso muestra el desplegado de la caja con la cara a sacar en terracota y un marco con la proporción real de esa cara (sale de las medidas; sin medidas no arranca y lleva a completarlas). Se puede saltear una cara o repetir una sola tocándola en la ficha.
+- Después de la foto se ajustan las 4 esquinas y la app endereza la cara (homografía, corrige la perspectiva) y la deja a la proporción exacta: lado largo 1400 px, JPEG.
+- Backend: columnas fotoFrente, fotoDerecha, fotoIzquierda, fotoDorso, fotoArriba, fotoAbajo al final de Productos (las hojas viejas suman los títulos solas) y `subirCara(codigo, cara, base64)`.
+- Orientación de cada foto (Rhino la usa así): frente y dorso con el producto parado; laterales = su lado derecho / izquierdo mirándolo de frente, parado; arriba = visto desde arriba con el frente hacia abajo de la foto; abajo = la base, inclinándolo hacia atrás, con el frente hacia arriba de la foto. Ancho × alto en mm de cada foto: frente y dorso ancho × alto; laterales prof × alto; arriba y abajo ancho × prof.

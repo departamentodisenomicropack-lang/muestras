@@ -220,6 +220,18 @@ textarea.in{height:auto;min-height:80px;padding:12px 16px}
 .crop .rect{position:absolute;border:3px solid var(--acc);border-radius:6px;box-shadow:0 0 0 2000px rgb(242 242 242/.72)}
 .crop .h{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;display:flex;align-items:center;justify-content:center;touch-action:none}
 .crop .h::after{content:"";width:20px;height:20px;border-radius:999px;background:var(--paper);border:3px solid var(--acc)}
+.crop .quad{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.cara-top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.cara-net{display:block;flex:none}
+.cara-blq .cara-net{border-radius:8px}
+.caras{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.cara-t{border:0;padding:0;background:none;display:flex;flex-direction:column;gap:6px;cursor:pointer;font:inherit;color:inherit;text-align:left;transition:transform .25s var(--spring)}
+.cara-t:active{transform:scale(.95)}
+.cara-t .im{aspect-ratio:1;border-radius:20px;background:var(--fill);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.cara-t .im img{width:100%;height:100%;object-fit:contain}
+.cara-t .im{border:2px solid transparent;box-sizing:border-box}
+.cara-t.vacia .im{background:var(--paper);border:2px dashed var(--line)}
+.cara-t small{font-size:13px;font-weight:700;padding-left:4px}
 .acciones{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
 .accion{border:0;border-radius:20px;background:var(--fill);min-height:76px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:800;color:var(--ink);cursor:pointer;transition:transform .25s var(--spring)}
 .accion:active{transform:scale(.95)}
@@ -549,12 +561,13 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 <input type="file" id="gal" accept="image/*" class="sr" tabindex="-1" aria-hidden="true">
 <input type="file" id="fotoIn" accept="image/*" class="sr" tabindex="-1" aria-hidden="true">
 <input type="file" id="galFoto" accept="image/*" class="sr" tabindex="-1" aria-hidden="true">
+<input type="file" id="galCara" accept="image/*" class="sr" tabindex="-1" aria-hidden="true">
 <div class="overlay" id="overlay" hidden><div class="box" id="overlayBox"></div></div>
 <div class="toast" id="toast" role="status" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611180022';
+const APP_VERSION='202611180946';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -667,7 +680,7 @@ const clientes=()=>{ const set=new Set(); S.productos.forEach(p=>p.cliente&&set.
 const lugares=()=>[...new Set([...S.cajas.values()].map(c=>c.lugar).filter(Boolean))].sort();
 
 /* ============ Navegación ============ */
-function salir(){ if(V.view==='camara'||V.view==='fotoCam'||V.view==='mov') detenerCamara(); }
+function salir(){ if(V.view==='camara'||V.view==='fotoCam'||V.view==='caraCam'||V.view==='mov') detenerCamara(); if(V.view==='caraAjuste'&&V.f._url){ URL.revokeObjectURL(V.f._url); V.f._url=null; } }
 function go(view,p={},f={}){ salir(); pila.push(V); V={view,p,f}; render(); window.scrollTo(0,0); if(VIEWS[view].enter) VIEWS[view].enter(); }
 function back(){ const de=V; salir(); if(V.view==='ingreso') borrarBorrador(); V=pila.pop()||{view:'inicio',p:{},f:{}}; c3dVolviendo=!!(C3D&&C3D.mode==='adentro'&&de.view==='caja'&&V.view==='inicio'); if(c3dVolviendo){ $('#c3dBlanco').style.opacity=1; } render(); window.scrollTo(0,0); if(VIEWS[V.view]&&VIEWS[V.view].reenter) VIEWS[V.view].reenter();
   if(de.view==='mov'&&de.f.tipo==='ingresar') cerrarMorph('.fab','#000');
@@ -812,7 +825,7 @@ async function pedirCamara(w,h){
 function soltarCamara(){ clearTimeout(camReservaT); if(camReserva){ camReserva.getTracks().forEach(t=>t.stop()); camReserva=null; } }
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) soltarCamara(); });
 function detenerCamara(){ camViva=false; clearTimeout(camTimer); camTimer=null; if(camStream){ document.querySelectorAll('video').forEach(v=>{ if(v.srcObject===camStream) v.srcObject=null; }); soltarCamara(); camReserva=camStream; camStream=null; camReservaT=setTimeout(soltarCamara,120000); } }
-document.addEventListener('visibilitychange',()=>{ const cv=V.view==='camara'||V.view==='fotoCam'; if(document.hidden&&cv) detenerCamara(); else if(!document.hidden&&cv&&!camViva){ render(); (V.view==='camara'?iniciarCamara:iniciarFotoCam)(); } });
+document.addEventListener('visibilitychange',()=>{ const cv=V.view==='camara'||V.view==='fotoCam'||V.view==='caraCam'; if(document.hidden&&cv) detenerCamara(); else if(!document.hidden&&cv&&!camViva){ render(); (V.view==='camara'?iniciarCamara:V.view==='caraCam'?iniciarCaraCam:iniciarFotoCam)(); } });
 async function alElegirFoto(e){
   const file=e.target.files&&e.target.files[0]; e.target.value=''; if(!file) return;
   overlay(`<svg class="spin" viewBox="0 0 100 100" aria-hidden="true"><path d="${SOL}" fill="#a35e47"/></svg><b>Leyendo el código…</b>`);
@@ -862,7 +875,7 @@ function aplicar(d){
   S.salidas=d.salidas||{};
   S.modelos=new Map((d.modelos||[]).map(m=>[m.codigo,m]));
 }
-function refrescar(){ if(V.view==='mov'){ pintarMov(); return; } if(['ingreso','agregar','mover','nuevaCaja','escanear','camara','fotoCam','recorte','devolver'].includes(V.view)) return;
+function refrescar(){ if(V.view==='mov'){ pintarMov(); return; } if(['ingreso','agregar','mover','nuevaCaja','escanear','camara','fotoCam','recorte','devolver','caraCam','caraAjuste'].includes(V.view)) return;
   if(V.view==='inicio'&&document.activeElement&&document.activeElement.id==='q'){ const r=$('#res'); if(r) r.innerHTML=resultados(); return; }
   const y=window.scrollY; render(); window.scrollTo(0,y); if(V.view==='etiqueta') dibujarEtiqueta(); }
 /* ----- Pantalla de carga: retiene hasta que lleguen las muestras ----- */
@@ -901,6 +914,113 @@ async function achicarFoto(file){
   const img=await abrirImagen(file); const c=lienzo(img,1024,false); soltar(img);
   const b=await new Promise(ok=>c.toBlob(b=>ok(b||file),'image/jpeg',.82)); c.width=c.height=0; return b;
 }
+
+/* ============ Fotos de las caras (para vestir el modelo 3D en Rhino) ============
+   Orden y orientación fijos (Rhino los lee así):
+   frente y dorso: el producto parado; laterales: su lado derecho / izquierdo mirándolo de frente;
+   arriba: visto desde arriba con el frente hacia abajo de la foto; abajo: la base, con el frente arriba de la foto. */
+const CARAS=[
+  {k:'frente',col:'fotoFrente',t:'Frente',corto:'Frente',d:'Ponelo parado y sacale de frente.'},
+  {k:'derecha',col:'fotoDerecha',t:'Lateral derecho',corto:'Derecha',d:'Su lado derecho, mirándolo de frente.'},
+  {k:'izquierda',col:'fotoIzquierda',t:'Lateral izquierdo',corto:'Izquierda',d:'Su lado izquierdo, mirándolo de frente.'},
+  {k:'dorso',col:'fotoDorso',t:'Dorso',corto:'Dorso',d:'Dalo vuelta: la parte de atrás, parado.'},
+  {k:'arriba',col:'fotoArriba',t:'Arriba',corto:'Arriba',d:'Desde arriba, con el frente hacia vos.'},
+  {k:'abajo',col:'fotoAbajo',t:'Abajo',corto:'Abajo',d:'Inclinalo hacia atrás hasta ver la base: el frente queda arriba.'}];
+const medidasDe=p=>{ const a=parseFloat(p&&p.ancho), h=parseFloat(p&&p.alto), d=parseFloat(p&&p.prof); return a>0&&h>0&&d>0?{a,h,d}:null; };
+// Ancho y alto (mm) de la foto de cada cara.
+function ladoCara(m,k){ return k==='frente'||k==='dorso'?[m.a,m.h]:k==='derecha'||k==='izquierda'?[m.d,m.h]:[m.a,m.d]; }
+const carasHechas=p=>CARAS.filter(x=>p&&p[x.col]).length;
+// Desplegado de la caja con la cara activa en terracota y las hechas en gris oscuro.
+function redCaras(p,activa,W=150,H=112){ const m=medidasDe(p)||{a:60,h:90,d:30};
+  const tw=2*m.a+2*m.d, th=m.h+2*m.d, s=Math.min(W/tw,H/th), a=m.a*s, h=m.h*s, d=m.d*s, ox=(W-tw*s)/2, oy=(H-th*s)/2;
+  const pos={arriba:[d,0,a,d],izquierda:[0,d,d,h],frente:[d,d,a,h],derecha:[d+a,d,d,h],dorso:[2*d+a,d,a,h],abajo:[d,d+h,a,d]};
+  return `<svg class="cara-net" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">${CARAS.map(x=>{ const [x0,y0,w,hh]=pos[x.k];
+    const fill=x.k===activa?'#a35e47':(p&&p[x.col]?'#464646':'#e8e8e8');
+    return `<rect x="${(ox+x0).toFixed(1)}" y="${(oy+y0).toFixed(1)}" width="${w.toFixed(1)}" height="${hh.toFixed(1)}" fill="${fill}" stroke="#fff" stroke-width="1.5"/>`; }).join('')}</svg>`; }
+function bloqueCaras(p){ const c=p.codigo, n=carasHechas(p);
+  if(!n) return `<button type="button" class="mod-blq cara-blq" data-act="carasEmpezar" style="width:100%;border:0;font:inherit;color:inherit;text-align:left;cursor:pointer">${redCaras(p,'frente',44,34)}<div><b>Fotos para el modelo</b><small>Las 6 caras, para vestir el 3D</small></div>${ico('chev',16)}</button>`;
+  return `<div class="sec"><h2>Fotos para el modelo</h2><span class="m">${n} de 6</span></div>
+  <div class="caras">${CARAS.map(x=>`<button type="button" class="cara-t${p[x.col]?'':' vacia'}" data-act="caraUna" data-cara="${x.k}" aria-label="${p[x.col]?'Repetir':'Sacar'} la foto: ${x.t}"><span class="im">${p[x.col]?`<img src="${fotoUrl(p[x.col])}" alt="" loading="lazy">`:ico('cam',20,'stroke:var(--ink-2)')}</span><small>${x.corto}</small></button>`).join('')}</div>
+  ${n<6?`<button type="button" class="btn" style="width:100%;margin-top:10px" data-act="carasEmpezar">Sacar las que faltan</button>`:''}`; }
+// La siguiente cara sin foto después de i (o -1).
+function siguienteCara(p,i){ for(let j=i+1;j<CARAS.length;j++) if(!p[CARAS[j].col]) return j; return -1; }
+function abrirCaras(i,uno){ const c=V.p.codigo, p=S.productos.get(c);
+  if(!medidasDe(p)){ toast('Primero cargá las medidas: con ellas se arma el marco de cada cara.'); go('ingreso',{codigo:c,editar:'1'}); return; }
+  if(!miNombre){ toast('Primero decinos quién sos (arriba de todo, en Inicio).'); return; }
+  go('caraCam',{codigo:c},{paso:i,uno:!!uno}); }
+// Marco de la cámara con la proporción de la cara (la caja de la cámara es 3:4).
+function guiaCara(asp){ const gw=Math.min(.78,.80*4*asp/3), gh=gw*3/(4*asp); return `left:${((1-gw)/2*100).toFixed(2)}%;top:${((1-gh)/2*100).toFixed(2)}%;width:${(gw*100).toFixed(2)}%;height:${(gh*100).toFixed(2)}%`; }
+async function iniciarCaraCam(){
+  const video=$('#video'); if(!video) return;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ camError('Este navegador no deja usar la cámara. Elegí la foto de la galería.'); return; }
+  try{ camStream=await pedirCamara(1920,1440); }
+  catch(e){ camError('No pude abrir la cámara. Revisá el permiso o elegí la foto de la galería.'); return; }
+  if(V.view!=='caraCam'){ detenerCamara(); return; }
+  video.srcObject=camStream; video.setAttribute('playsinline',''); video.muted=true;
+  try{ await video.play(); }catch(e){}
+  camViva=true; camMsg('');
+  try{ const [track]=camStream.getVideoTracks(); const cap=track.getCapabilities&&track.getCapabilities(); if(cap&&cap.focusMode&&cap.focusMode.includes('continuous')) await track.applyConstraints({advanced:[{focusMode:'continuous'}]}); }catch(e){}
+}
+// Saca el cuadro entero (para poder ajustar las esquinas) y arranca las esquinas en el marco.
+async function dispararCara(){
+  const video=$('#video'); if(!video||!camViva||!video.videoWidth){ toast('La cámara todavía no está lista.'); return; }
+  const vw=video.videoWidth, vh=video.videoHeight, box=video.getBoundingClientRect(), gr=$('#guia').getBoundingClientRect();
+  const sc=Math.max(box.width/vw,box.height/vh), ox=(vw*sc-box.width)/2, oy=(vh*sc-box.height)/2;
+  const fx=x=>Math.min(1,Math.max(0,(x-box.left+ox)/sc/vw)), fy=y=>Math.min(1,Math.max(0,(y-box.top+oy)/sc/vh));
+  const quad=[[fx(gr.left),fy(gr.top)],[fx(gr.right),fy(gr.top)],[fx(gr.right),fy(gr.bottom)],[fx(gr.left),fy(gr.bottom)]];
+  const k=Math.min(1,2000/Math.max(vw,vh)); const c=document.createElement('canvas'); c.width=Math.round(vw*k); c.height=Math.round(vh*k); c.getContext('2d').drawImage(video,0,0,c.width,c.height);
+  const blob=await new Promise(ok=>c.toBlob(ok,'image/jpeg',.92)); c.width=c.height=0;
+  detenerCamara(); go('caraAjuste',{codigo:V.p.codigo},{paso:V.f.paso,uno:V.f.uno,blob,quad});
+}
+async function caraDeGaleria(file){
+  if(V.view!=='caraCam') return; const p=S.productos.get(V.p.codigo), x=CARAS[V.f.paso], m=medidasDe(p); if(!m) return;
+  overlay(spinner('Abriendo la foto…'));
+  try{ const img=await abrirImagen(file); const c=lienzo(img,2000,false); soltar(img); const blob=await new Promise(ok=>c.toBlob(ok,'image/jpeg',.92));
+    const [w,h]=ladoCara(m,x.k), asp=(w/h)/(c.width/c.height), fw=asp>=1?.8:.8*asp, fh=asp>=1?.8/asp:.8; c.width=c.height=0;
+    const q=[[(1-fw)/2,(1-fh)/2],[(1+fw)/2,(1-fh)/2],[(1+fw)/2,(1+fh)/2],[(1-fw)/2,(1+fh)/2]];
+    overlay(null); detenerCamara(); go('caraAjuste',{codigo:V.p.codigo},{paso:V.f.paso,uno:V.f.uno,blob,quad:q}); }
+  catch(e){ overlay(null); toast('No se pudo abrir esa foto.'); }
+}
+function pintarQuad(){ const q=V.f.quad, pol=$('#quadPol'); if(!q||!pol) return;
+  pol.setAttribute('points',q.map(([x,y])=>`${x},${y}`).join(' '));
+  document.querySelectorAll('#quadBox .h').forEach(h=>{ const [x,y]=q[+h.dataset.i]; h.style.left=x*100+'%'; h.style.top=y*100+'%'; }); }
+function iniciarAjuste(){
+  const img=$('#quadImg'), box=$('#quadBox'); if(!img||!box||!V.f.blob){ back(); return; }
+  if(V.f._url) URL.revokeObjectURL(V.f._url); V.f._url=URL.createObjectURL(V.f.blob); img.src=V.f._url; pintarQuad();
+  let act=-1;
+  box.addEventListener('pointerdown',e=>{ const h=e.target.closest('.h'); if(!h) return; act=+h.dataset.i; e.preventDefault();
+    const mover=ev=>{ if(act<0) return; const b=img.getBoundingClientRect(); V.f.quad[act]=[Math.min(1,Math.max(0,(ev.clientX-b.left)/b.width)),Math.min(1,Math.max(0,(ev.clientY-b.top)/b.height))]; pintarQuad(); };
+    const fin=()=>{ act=-1; window.removeEventListener('pointermove',mover); window.removeEventListener('pointerup',fin); window.removeEventListener('pointercancel',fin); };
+    window.addEventListener('pointermove',mover); window.addEventListener('pointerup',fin); window.addEventListener('pointercancel',fin); });
+}
+// Homografía: lleva (u,v) del rectángulo de salida a (x,y) de la foto. d y s: 4 puntos [tl,tr,br,bl].
+function homografia(d,s){ const A=[],b=[];
+  for(let i=0;i<4;i++){ const [u,v]=d[i],[x,y]=s[i]; A.push([u,v,1,0,0,0,-u*x,-v*x]); b.push(x); A.push([0,0,0,u,v,1,-u*y,-v*y]); b.push(y); }
+  for(let c=0;c<8;c++){ let p=c; for(let r=c+1;r<8;r++) if(Math.abs(A[r][c])>Math.abs(A[p][c])) p=r; [A[c],A[p]]=[A[p],A[c]]; [b[c],b[p]]=[b[p],b[c]];
+    for(let r=0;r<8;r++){ if(r===c) continue; const f=A[r][c]/A[c][c]; if(!f) continue; for(let k=c;k<8;k++) A[r][k]-=f*A[c][k]; b[r]-=f*b[c]; } }
+  return b.map((v,i)=>v/A[i][i]); }
+// Endereza la cara: corrige la perspectiva y la deja con la proporción real (lado largo 1400 px).
+async function enderezarCara(blob,quad,asp){
+  const img=await abrirImagen(blob); const src=lienzo(img,2000,false); soltar(img);
+  const sw=src.width, sh=src.height, sd=src.getContext('2d').getImageData(0,0,sw,sh).data;
+  const W=asp>=1?1400:Math.round(1400*asp), H=asp>=1?Math.round(1400/asp):1400;
+  const h=homografia([[0,0],[W,0],[W,H],[0,H]],quad.map(([x,y])=>[x*sw,y*sh]));
+  const out=document.createElement('canvas'); out.width=W; out.height=H; const og=out.getContext('2d'); const od=og.createImageData(W,H), o=od.data;
+  for(let v=0;v<H;v++){ const vv=v+.5; for(let u=0;u<W;u++){ const uu=u+.5, den=h[6]*uu+h[7]*vv+1;
+    let x=(h[0]*uu+h[1]*vv+h[2])/den-.5, y=(h[3]*uu+h[4]*vv+h[5])/den-.5;
+    x=Math.min(sw-1.001,Math.max(0,x)); y=Math.min(sh-1.001,Math.max(0,y));
+    const x0=x|0, y0=y|0, fx=x-x0, fy=y-y0, i00=(y0*sw+x0)*4, i10=i00+4, i01=i00+sw*4, i11=i01+4, j=(v*W+u)*4;
+    for(let ch=0;ch<3;ch++) o[j+ch]=(sd[i00+ch]*(1-fx)+sd[i10+ch]*fx)*(1-fy)+(sd[i01+ch]*(1-fx)+sd[i11+ch]*fx)*fy;
+    o[j+3]=255; } }
+  src.width=src.height=0; og.putImageData(od,0,0);
+  const r=await new Promise(ok=>out.toBlob(ok,'image/jpeg',.86)); out.width=out.height=0; return r; }
+// Vuelve a la ficha sin pasar por la cámara.
+function volverAFicha(){ salir(); while(V.view==='caraAjuste'||V.view==='caraCam') V=pila.pop()||{view:'inicio',p:{},f:{}}; render(); window.scrollTo(0,0); if(VIEWS[V.view]&&VIEWS[V.view].reenter) VIEWS[V.view].reenter(); }
+// Después de guardar o saltear: la siguiente cara que falta, o la ficha.
+function seguirCaras(desde,uno){ const cam=pila[pila.length-1], p=S.productos.get(V.p.codigo)||{}; const sig=uno?-1:siguienteCara(p,desde);
+  if(V.view==='caraAjuste'&&cam&&cam.view==='caraCam'&&sig>=0){ if(V.f._url) URL.revokeObjectURL(V.f._url); cam.f.paso=sig; back(); return; }
+  if(V.view==='caraCam'&&sig>=0){ V.f.paso=sig; detenerCamara(); render(); iniciarCaraCam(); return; }
+  const n=carasHechas(p); volverAFicha(); toast(n===6?'Listas las 6 caras':`${n} de 6 caras`); }
 
 /* ============ Vistas ============ */
 const cabecera=(der='')=>`<div class="top"><button class="round" data-act="back" aria-label="Volver">${ico('back')}</button>${der?`<div class="tools">${der}</div>`:''}</div>`;
@@ -1070,6 +1190,25 @@ fotoCam:{ html(){
   <p class="help" style="text-align:center">Que entre entero en el marco y que no haya otras cosas adentro.</p>`;
 }, enter(){ iniciarFotoCam(); }},
 
+caraCam:{ html(){
+  const p=S.productos.get(V.p.codigo)||{}, x=CARAS[V.f.paso]||CARAS[0], m=medidasDe(p)||{a:1,h:1,d:1}, [w,h]=ladoCara(m,x.k);
+  return `${cabecera()}<div class="cara-top"><div><p class="kicker">Fotos para el modelo${V.f.uno?'':` · ${V.f.paso+1} de 6`}</p><h1 class="md">${x.t}</h1><p class="sub" style="margin-top:6px">${x.d}</p></div>${redCaras(p,x.k,96,72)}</div>
+  <div class="cam" id="camBox" style="margin-top:14px"><video id="video" playsinline muted autoplay></video><div class="guia" id="guia" style="${guiaCara(w/h)}"></div><p class="msg" id="camMsg">Abriendo la cámara…</p></div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:24px;margin-top:16px">
+   <label for="galCara" class="link" style="min-width:90px;text-align:right">Galería</label>
+   <button type="button" class="shutter" data-act="dispararCara" aria-label="Sacar la foto: ${x.t}"><span></span></button>
+   ${V.f.uno?'<span style="min-width:90px"></span>':'<button type="button" class="link" style="min-width:90px;text-align:left" data-act="saltearCara">Saltear</button>'}</div>
+  <p class="help" style="text-align:center">Que la cara llene el marco. Después ajustás las esquinas.</p>`;
+}, enter(){ iniciarCaraCam(); }, reenter(){ iniciarCaraCam(); }},
+
+caraAjuste:{ html(){
+  const x=CARAS[V.f.paso]||CARAS[0];
+  return `${cabecera()}<p class="kicker">Fotos para el modelo · ${x.t}</p><h1 class="md">Ajustá las esquinas</h1><p class="sub">Llevá cada punto a una esquina de la cara. La foto sale derecha y a medida.</p>
+  <div class="crop"><div class="cropin" id="quadBox"><div class="clip"><img id="quadImg" alt="Foto de la cara ${x.t}"><svg class="quad" viewBox="0 0 1 1" preserveAspectRatio="none" aria-hidden="true"><polygon id="quadPol" fill="rgb(163 94 71/.14)" stroke="#a35e47" stroke-width="3" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg></div>
+   ${[0,1,2,3].map(i=>`<span class="h" data-i="${i}"></span>`).join('')}</div></div>
+  <div class="btns"><button type="button" class="btn" data-act="back">Repetir</button><button type="button" class="btn pri" data-act="usarCara">Usar esta foto</button></div>`;
+}, enter(){ iniciarAjuste(); }},
+
 camara:{ html(){
   const t={destino:'Escaneá el QR de la caja',guardarEn:'Escaneá lo que guardás en '+cajaNom(scanIntent.caja)}[scanIntent.tipo]||'Escaneá';
   return `${cabecera()}<h1 class="md">${esc(t)}</h1>
@@ -1142,6 +1281,7 @@ producto:{ html(){
   ${st.length?`<div class="acts3">${[['sacar','Sacar','out'],['mover','Mover','arrow'],['devolver','Devolver','user']].map(([k,l,ic])=>`<button class="accion" data-hoja="${k}"><span class="bub">${ico(ic,18,'stroke:#fff')}</span>${l}</button>`).join('')}</div>`:''}
   ${V.f.sumar?panelSumar(c):`<div style="display:flex;justify-content:center"><button type="button" class="link acc" data-act="abrirSumar">+ Agregar más unidades</button></div>`}
   ${dims.length||p.peso?`<div class="medidas"><span>Medidas</span><b>${dims.length?esc(dims.join(' × '))+' mm':''}${dims.length&&p.peso?' · ':''}${p.peso?esc(p.peso)+' g':''}</b></div>`:''}
+  ${bloqueCaras(p)}
   ${S.modelos.has(c)?bloqueModelo(S.modelos.get(c)):''}
   <div class="sec"><h2>Historial</h2></div>
   ${hist?(hist.length?`<ol class="feed">${hist.map(textoMov).join('')}</ol>`:`<p class="help">Sin movimientos.</p>`):`<p class="help">Cargando…</p>`}
@@ -1631,6 +1771,16 @@ async function cargarHist(){
 
 /* ============ Guardados ============ */
 const ACCIONES={
+  carasEmpezar(){ const p=S.productos.get(V.p.codigo)||{}; const i=siguienteCara(p,-1); abrirCaras(i<0?0:i,false); },
+  caraUna(a){ const i=CARAS.findIndex(x=>x.k===a.dataset.cara); if(i>=0) abrirCaras(i,true); },
+  dispararCara(){ dispararCara(); },
+  saltearCara(){ seguirCaras(V.f.paso,false); },
+  async usarCara(){ const f=V.f, c=V.p.codigo, p=S.productos.get(c), x=CARAS[f.paso], m=medidasDe(p); if(!p||!m||!f.blob||ocupado) return;
+    const [w,h]=ladoCara(m,x.k); overlay(spinner('Enderezando la foto…')); let out=null;
+    try{ out=await enderezarCara(f.blob,f.quad,w/h); }catch(e){ console.warn(e); } overlay(null);
+    if(!out){ toast('No se pudo enderezar la foto. Probá de nuevo.'); return; }
+    const d=await escribir('subirCara',[c,x.k,await aBase64(out)],'Guardando la foto…'); if(!d) return;
+    seguirCaras(f.paso,f.uno); },
   copiarRuta(a){ const r=a.dataset.ruta||''; (navigator.clipboard?navigator.clipboard.writeText(r):Promise.reject()).then(()=>toast('Ruta copiada'),()=>toast(r)); },
   back, manual(){ const v=(V.f.manual||'').trim(); if(!v){ toast('Escribí un código.'); return; } manejarCodigo(v); },
   sinCodigo(){ const it=scanIntent; scanIntent={tipo:'abrir'}; salir(); while(V.view==='escanear'||V.view==='camara') V=pila.pop()||{view:'inicio',p:{},f:{}}; go('ingreso',{codigo:'',caja:it.caja||(V.view==='caja'?V.p.id:'')||''}); },
@@ -2165,6 +2315,7 @@ async function fotoElegida(vista,file){
   pintarFoto(vista);
 }
 $('#fotoIn').addEventListener('change',e=>{ const file=e.target.files&&e.target.files[0]; e.target.value=''; if(file) fotoElegida(V,file); });
+$('#galCara').addEventListener('change',e=>{ const file=e.target.files&&e.target.files[0]; e.target.value=''; if(file) caraDeGaleria(file); });
 $('#galFoto').addEventListener('change',e=>{ const file=e.target.files&&e.target.files[0]; e.target.value=''; if(!file) return; detenerCamara(); back(); fotoElegida(V,file); });
 
 /* ============ Borrador: si el celular recarga la página al volver de la cámara, no se pierde lo cargado ============ */
