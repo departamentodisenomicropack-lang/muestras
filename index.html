@@ -542,6 +542,44 @@ body.escaneo .toast{background:#fff;color:#000}
 .toast .tacc{border:0;background:rgb(255 255 255/.14);color:#e0967c;font:800 14px var(--f);border-radius:12px;padding:8px 12px;margin-left:12px;cursor:pointer}
 body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 .toast.conacc{display:flex;align-items:center;padding:8px 8px 8px 18px}
+
+/* ===== Versión para la compu ===== */
+.pcbar{display:none}
+.ficha,.f-a,.f-b{display:contents}
+html.compu .pcbar{--paper:#fff;--fill:#f2f2f2;--fill-2:#e8e8e8;--ink:#000;--ink-2:#464646;--acc:#a35e47;--acc-ink:#8c4e3a;--acc-soft:#f6ece8;color:#000;position:sticky;top:0;z-index:20;height:76px;box-sizing:border-box;padding:0 40px;display:flex;align-items:center;gap:28px;border-bottom:1px solid var(--fill-2);background:#fff}
+html.compu .pcbar .logo{height:22px;width:auto;display:block}
+html.compu .pcbar nav{display:flex;gap:4px;flex:1}
+html.compu .pcbar nav button{height:44px;padding:0 16px;border-radius:22px;border:0;background:transparent;font:700 14.5px var(--f);color:var(--ink);display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:border-radius .45s var(--spring),background .2s}
+html.compu .pcbar nav button .ico{stroke:currentColor}
+html.compu .pcbar nav button:hover{background:var(--fill);border-radius:14px}
+html.compu .pcbar nav button[aria-current="page"]{background:var(--acc-soft);color:var(--acc-ink)}
+html.compu .pcbar .agregar{height:48px;padding:0 20px 0 6px;border-radius:999px;border:0;background:var(--ink);color:#fff;font:800 15px var(--f);display:flex;align-items:center;gap:10px;cursor:pointer;transition:transform .3s var(--spring)}
+html.compu .pcbar .agregar:active{transform:scale(.95)}
+html.compu .pcbar .agregar .shape{position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center}
+html.compu .pcbar .agregar .shape svg:first-child{position:absolute;inset:0}
+html.compu .pcbar .agregar .shape .ico{position:relative;stroke:#fff;stroke-width:2.4}
+html.compu .pcbar .yo{display:flex;align-items:center;gap:10px;border:0;background:none;padding:0;cursor:pointer;font:inherit;color:inherit}
+html.compu .pcbar .yo>span:first-child{display:flex;flex-direction:column;align-items:flex-end}
+html.compu .pcbar .yo b{font-size:14px;font-weight:800}
+html.compu .pcbar .yo small{font-size:12px;color:var(--ink-2)}
+html.compu .pcbar .av{position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center}
+html.compu .pcbar .av svg{position:absolute;inset:0}
+html.compu .pcbar .av b{position:relative;color:#fff;font-size:16px;font-weight:900}
+html.compu .app{max-width:1180px;padding:36px 64px 120px}
+html.compu .hola-top,html.compu .fab-inicio{display:none}
+html.compu .hola{font-size:60px;line-height:.95}
+html.compu .hola-sub{font-size:17px}
+html.compu .ficha{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:48px;align-items:start}
+html.compu .f-a,html.compu .f-b{display:block;min-width:0}
+html.compu .f-a{position:sticky;top:112px}
+html.compu .f-b>.dark:first-child{margin-top:0}
+html.compu .caras{grid-template-columns:repeat(6,minmax(0,1fr))}
+html.compu .cam{max-width:560px;margin-left:auto;margin-right:auto}
+html.compu .crop{max-width:640px;margin-left:auto;margin-right:auto}
+html.compu .cam.soltar{outline:3px dashed var(--acc);outline-offset:4px}
+html.compu .visor{max-width:720px}
+
+html.compu .cajas-top{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px 20px}
 @media (prefers-reduced-motion:reduce){.roll .rc,.cam .marco{transition:none}#app.vista-entra>*{animation:none}.tm.in,.tm.out{animation:none}}
 </style>
 </head>
@@ -554,6 +592,7 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
     <button type="button" class="btn pri sp-re" id="spRe" hidden>Reintentar</button>
   </div>
 </div>
+<header class="pcbar" id="pcbar" hidden></header>
 <main class="app" id="app" aria-live="polite"></main>
 <canvas id="c3d" aria-hidden="true"></canvas><div id="c3dBlanco"></div>
 <nav class="nav" id="nav" aria-label="Secciones"></nav>
@@ -567,7 +606,7 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611180946';
+const APP_VERSION='202611200932';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -915,6 +954,41 @@ async function achicarFoto(file){
   const b=await new Promise(ok=>c.toBlob(b=>ok(b||file),'image/jpeg',.82)); c.width=c.height=0; return b;
 }
 
+/* ============ Versión para la compu (como Brief POP en PC) ============
+   Misma app y mismo link. Con pantalla ancha y mouse: barra arriba con las secciones,
+   contenido ancho, ficha en dos columnas, pistola de códigos y fotos arrastradas. */
+const mqPC=matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)');
+let PC=mqPC.matches; document.documentElement.classList.toggle('compu',PC);
+(mqPC.addEventListener?mqPC.addEventListener.bind(mqPC,'change'):mqPC.addListener.bind(mqPC))(e=>{ PC=e.matches; document.documentElement.classList.toggle('compu',PC); if(typeof render==='function') render(); });
+function barraPC(){
+  const sec=[['inicio','Inicio','home'],['productos','Productos','prod'],['porCompletar','Por completar','edit'],['actividad','Actividad','undo']];
+  const raiz=(pila[0]&&pila[0].view==='inicio'&&pila[1])?pila[1].view:V.view;
+  const ini=(miNombre||'').trim().charAt(0).toUpperCase();
+  return `<img class="logo" src="logo-micropack.svg" alt="Micropack Americas"><nav aria-label="Secciones">${sec.map(([k,l,i])=>`<button type="button" data-act="pcIr" data-v="${k}"${(V.view===k||raiz===k)?' aria-current="page"':''}>${ico(i,18)}${l}</button>`).join('')}</nav>
+  <button type="button" class="agregar" data-mov="ingresar"><span class="shape">${shape(GALLETA,36,'#a35e47')}<svg class="ico" width="18" height="18" viewBox="0 0 24 24"><path d="${I.scan}"/></svg></span>Agregar producto</button>
+  ${miNombre?`<button type="button" class="yo" data-act="cambiarNombre" aria-label="${esc(miNombre)}: cambiar de usuario"><span><b>${esc(miNombre)}</b><small>Diseño</small></span><span class="av">${shape(GALLETA,44,'#a35e47')}<b>${esc(ini)}</b></span></button>`:''}`; }
+// Pistola de códigos (USB): teclea rápido y termina en Enter. "/" va al buscador.
+let teclas={t:'',at:0};
+document.addEventListener('keydown',e=>{
+  const el=document.activeElement, campo=el&&/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName);
+  if(e.key==='Enter'&&el&&el.id==='codMov'){ e.preventDefault(); const t=el.value.trim(); el.value=''; if(t) codigoEnMov(t); return; }
+  if(e.key==='Enter'&&el&&el.id==='q'&&/^\d{8,14}$/.test(el.value.trim())){ e.preventDefault(); const t=el.value.trim(); V.f.q=''; el.value=''; manejarCodigo(t); return; }
+  if(!PC||campo||e.ctrlKey||e.metaKey||e.altKey) return;
+  if(e.key==='/'){ e.preventDefault(); if(V.view!=='inicio'){ salir(); pila.length=0; V={view:'inicio',p:{},f:{}}; render(); } const q=$('#q'); if(q) q.focus(); return; }
+  const ahora=e.timeStamp||performance.now(); if(ahora-teclas.at>1000) teclas.t=''; teclas.at=ahora;  // pistola o tipeado a mano, fuera de un campo
+  if(e.key==='Enter'){ const t=teclas.t; teclas.t=''; if(t.length>=6){ e.preventDefault(); if(V.view==='mov') codigoEnMov(t); else manejarCodigo(t); } return; }
+  if(e.key.length===1) teclas.t+=e.key;
+});
+// Fotos de las caras: en la compu se pueden arrastrar.
+document.addEventListener('dragover',e=>{ if(V.view==='caraCam'){ e.preventDefault(); const b=$('#camBox'); if(b) b.classList.add('soltar'); } });
+document.addEventListener('dragleave',e=>{ if(!e.relatedTarget){ const b=$('#camBox'); if(b) b.classList.remove('soltar'); } });
+document.addEventListener('drop',e=>{ if(V.view!=='caraCam') return; e.preventDefault(); const b=$('#camBox'); if(b) b.classList.remove('soltar');
+  const f=[...(e.dataTransfer&&e.dataTransfer.files||[])].find(x=>/^image\//.test(x.type)); if(f) caraDeGaleria(f); else toast('Arrastrá una foto (JPG o PNG).'); });
+// Instalada en la compu: abre ocupando toda la pantalla (igual que Brief POP).
+(function(){ try{ const inst=matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: window-controls-overlay)').matches;
+  const compu=screen.availWidth>=900&&matchMedia('(pointer: fine)').matches; if(!inst||!compu) return;
+  if(window.outerWidth<screen.availWidth*.9||window.outerHeight<screen.availHeight*.9){ window.moveTo(screen.availLeft||0,screen.availTop||0); window.resizeTo(screen.availWidth,screen.availHeight); } }catch(e){} })();
+
 /* ============ Fotos de las caras (para vestir el modelo 3D en Rhino) ============
    Orden y orientación fijos (Rhino los lee así):
    frente y dorso: el producto parado; laterales: su lado derecho / izquierdo mirándolo de frente;
@@ -941,7 +1015,8 @@ function bloqueCaras(p){ const c=p.codigo, n=carasHechas(p);
   if(!n) return `<button type="button" class="mod-blq cara-blq" data-act="carasEmpezar" style="width:100%;border:0;font:inherit;color:inherit;text-align:left;cursor:pointer">${redCaras(p,'frente',44,34)}<div><b>Fotos para el modelo</b><small>Las 6 caras, para vestir el 3D</small></div>${ico('chev',16)}</button>`;
   return `<div class="sec"><h2>Fotos para el modelo</h2><span class="m">${n} de 6</span></div>
   <div class="caras">${CARAS.map(x=>`<button type="button" class="cara-t${p[x.col]?'':' vacia'}" data-act="caraUna" data-cara="${x.k}" aria-label="${p[x.col]?'Repetir':'Sacar'} la foto: ${x.t}"><span class="im">${p[x.col]?`<img src="${fotoUrl(p[x.col])}" alt="" loading="lazy">`:ico('cam',20,'stroke:var(--ink-2)')}</span><small>${x.corto}</small></button>`).join('')}</div>
-  ${n<6?`<button type="button" class="btn" style="width:100%;margin-top:10px" data-act="carasEmpezar">Sacar las que faltan</button>`:''}`; }
+  ${n<6?`<button type="button" class="btn" style="width:100%;margin-top:10px" data-act="carasEmpezar">Sacar las que faltan</button>`:''}
+  <p class="help" style="margin-top:10px">${S.modelos.has(c)?'Modelo 3D listo.':'Falta importarla en Rhino: Stock diseño → Importar muestra.'}</p>`; }
 // La siguiente cara sin foto después de i (o -1).
 function siguienteCara(p,i){ for(let j=i+1;j<CARAS.length;j++) if(!p[CARAS[j].col]) return j; return -1; }
 function abrirCaras(i,uno){ const c=V.p.codigo, p=S.productos.get(c);
@@ -954,7 +1029,7 @@ async function iniciarCaraCam(){
   const video=$('#video'); if(!video) return;
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ camError('Este navegador no deja usar la cámara. Elegí la foto de la galería.'); return; }
   try{ camStream=await pedirCamara(1920,1440); }
-  catch(e){ camError('No pude abrir la cámara. Revisá el permiso o elegí la foto de la galería.'); return; }
+  catch(e){ camError(PC?'No encontré una cámara. Elegí el archivo o arrastrá la foto acá.':'No pude abrir la cámara. Revisá el permiso o elegí la foto de la galería.'); return; }
   if(V.view!=='caraCam'){ detenerCamara(); return; }
   video.srcObject=camStream; video.setAttribute('playsinline',''); video.muted=true;
   try{ await video.play(); }catch(e){}
@@ -1020,7 +1095,7 @@ function volverAFicha(){ salir(); while(V.view==='caraAjuste'||V.view==='caraCam
 function seguirCaras(desde,uno){ const cam=pila[pila.length-1], p=S.productos.get(V.p.codigo)||{}; const sig=uno?-1:siguienteCara(p,desde);
   if(V.view==='caraAjuste'&&cam&&cam.view==='caraCam'&&sig>=0){ if(V.f._url) URL.revokeObjectURL(V.f._url); cam.f.paso=sig; back(); return; }
   if(V.view==='caraCam'&&sig>=0){ V.f.paso=sig; detenerCamara(); render(); iniciarCaraCam(); return; }
-  const n=carasHechas(p); volverAFicha(); toast(n===6?'Listas las 6 caras':`${n} de 6 caras`); }
+  const n=carasHechas(p); volverAFicha(); toast(S.modelos.has(p.codigo)?(n===6?'Listas las 6 caras':`${n} de 6 caras`):'Listo. Ahora en Rhino: Stock diseño → Importar muestra'); }
 
 /* ============ Vistas ============ */
 const cabecera=(der='')=>`<div class="top"><button class="round" data-act="back" aria-label="Volver">${ico('back')}</button>${der?`<div class="tools">${der}</div>`:''}</div>`;
@@ -1057,8 +1132,7 @@ function cuerpoInicio(){
    <div class="c3d-pie" id="c3dPie">${c3dPie(cs)}</div>
    <div class="sr">${cs.map(c=>`<button data-go="caja" data-id="${esc(c.id)}">Abrir ${esc(c.nombre)}</button>`).join('')}</div>`
    :`<div class="cajas-top">${cs.map(c=>cajaArriba(c)).join('')}</div>`}
-   <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><button class="link acc" data-go="nuevaCaja">+ Nueva caja</button><button class="link acc" data-go="productos">Todos los productos</button></div>
-   ${S.modelos.size?`<button class="mod-ir" data-go="modelos">${cubo(30,18,22)}<span><b>Modelos 3D</b>${S.modelos.size} ${S.modelos.size===1?'producto modelado':'productos modelados'} para los planos</span>${ico('chev',16)}</button>`:''}`
+   <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><button class="link acc" data-go="nuevaCaja">+ Nueva caja</button><button class="link acc" data-go="productos">Todos los productos</button></div>`
    :`<div class="empty"><b>Todavía no hay cajas</b><p>Creá la primera, imprimí su etiqueta y pegala en la caja o el estante.</p><button class="btn pri big" data-go="nuevaCaja">${ico('plus',20)}Crear la primera caja</button></div>`}
   ${movs.length?`<div class="sec"><h2>Actividad</h2><button class="link acc" style="padding:0" data-go="actividad">Ver toda</button></div><ol class="feed">${movs.map(textoMov).join('')}</ol>`:''}
   <p style="text-align:center;margin:28px 0 90px"><button type="button" class="link" style="font-size:13px;color:var(--ink-3);text-decoration:none" data-go="diag">Versión ${APP_VERSION.slice(6,8)}/${APP_VERSION.slice(4,6)} ${APP_VERSION.slice(8,10)}:${APP_VERSION.slice(10,12)} · Probar fotos</button></p>`;
@@ -1079,7 +1153,7 @@ inicio:{ html(){
   return `<div class="hola-top"><img class="logo" src="logo-micropack.svg" alt="Micropack Americas">${miNombre?`<button type="button" class="avatar" data-act="cambiarNombre" aria-label="${esc(miNombre)}: cambiar de usuario">${shape(GALLETA,48,'#a35e47')}<b>${esc(ini)}</b></button>`:''}</div>
   <h1 class="hola">¡Hola${miNombre?', '+esc(miNombre.split(' ')[0]):''}!</h1><p class="hola-sub">¿Qué buscamos hoy en el estudio?</p>
   <div class="search">${ico('search',20,'stroke:#000;flex:none')}<label for="q" class="sr">Buscar muestras</label><input id="q" data-f="q" type="search" enterkeyhint="search" autocomplete="off" placeholder="Producto, marca o campaña" value="${esc(q)}">${q?`<button class="x" data-act="limpiarQ" aria-label="Borrar búsqueda">${ico('plus',16,'transform:rotate(45deg)')}</button>`:''}</div>
-  <div id="res">${q.trim()?resultados():cuerpoInicio()}</div><button type="button" class="fab" data-mov="ingresar"><span class="shape">${shape(GALLETA,44,'#a35e47')}<svg class="ico" width="20" height="20" viewBox="0 0 24 24"><path d="${I.scan}"/></svg></span>Agregar producto</button>`;
+  <div id="res">${q.trim()?resultados():cuerpoInicio()}</div><button type="button" class="fab fab-inicio" data-mov="ingresar"><span class="shape">${shape(GALLETA,44,'#a35e47')}<svg class="ico" width="20" height="20" viewBox="0 0 24 24"><path d="${I.scan}"/></svg></span>Agregar producto</button>`;
 }},
 
 /* ---------- Movimiento (como BoxHero): tipo + escanear varios + aplicar ---------- */
@@ -1088,7 +1162,8 @@ mov:{ html(){
     if(V.p.codigo&&S.productos.has(V.p.codigo)) agregarLinea(V.p.codigo,true); }
   const cam=cls=>`<div class="cam ${cls}" id="camBox"><video id="video" playsinline muted autoplay></video><div class="marco"><i></i><i></i><i></i><i></i></div><p class="msg" id="camMsg">Abriendo la cámara…</p><div class="ok" id="camOk" style="opacity:0" role="status" aria-live="polite"></div></div>`;
   if(f.tipo==='ingresar') return `<div class="scan-top"><button class="round" data-act="back" aria-label="Cerrar">${ico('x')}</button><span class="cuenta" id="cuenta" aria-label="Unidades escaneadas">${roll('cuenta',f.lineas.reduce((a,l)=>a+l.cant,0))}</span></div>
-  ${cam('carrito')}<p class="help" style="text-align:center;margin-top:8px">Apuntá a los códigos, uno atrás de otro. La caja la elegís al final.</p>
+  ${cam('carrito')}<p class="help" style="text-align:center;margin-top:8px">${PC?'Leé los códigos con la pistola o escribilos acá. La caja la elegís al final.':'Apuntá a los códigos, uno atrás de otro. La caja la elegís al final.'}</p>
+  ${PC?`<div class="search" style="margin-top:10px">${ico('scan',20,'stroke:#000;flex:none')}<label for="codMov" class="sr">Código del producto</label><input id="codMov" inputmode="numeric" autocomplete="off" placeholder="Código de barras + Enter"></div>`:''}
   <div id="movCuerpo">${movCuerpo()}</div><div id="movHoja">${hojaDestino()}</div>`;
   const tit={sacar:'Sacar',mover:'Mover a otra caja',devolver:'Devolver al cliente'}[f.tipo];
   return `${cabecera()}<h1 class="md">${tit}</h1>${f.desdeDef?`<p class="sub">Escaneá lo que sale de <b>${esc(cajaNom(f.desdeDef))}</b>.</p>`:''}
@@ -1195,10 +1270,10 @@ caraCam:{ html(){
   return `${cabecera()}<div class="cara-top"><div><p class="kicker">Fotos para el modelo${V.f.uno?'':` · ${V.f.paso+1} de 6`}</p><h1 class="md">${x.t}</h1><p class="sub" style="margin-top:6px">${x.d}</p></div>${redCaras(p,x.k,96,72)}</div>
   <div class="cam" id="camBox" style="margin-top:14px"><video id="video" playsinline muted autoplay></video><div class="guia" id="guia" style="${guiaCara(w/h)}"></div><p class="msg" id="camMsg">Abriendo la cámara…</p></div>
   <div style="display:flex;align-items:center;justify-content:center;gap:24px;margin-top:16px">
-   <label for="galCara" class="link" style="min-width:90px;text-align:right">Galería</label>
+   <label for="galCara" class="link" style="min-width:90px;text-align:right">${PC?'Elegir archivo':'Galería'}</label>
    <button type="button" class="shutter" data-act="dispararCara" aria-label="Sacar la foto: ${x.t}"><span></span></button>
    ${V.f.uno?'<span style="min-width:90px"></span>':'<button type="button" class="link" style="min-width:90px;text-align:left" data-act="saltearCara">Saltear</button>'}</div>
-  <p class="help" style="text-align:center">Que la cara llene el marco. Después ajustás las esquinas.</p>`;
+  <p class="help" style="text-align:center">${PC?'Sacala con la cámara o arrastrá la foto acá. Después ajustás las esquinas.':'Que la cara llene el marco. Después ajustás las esquinas.'}</p>`;
 }, enter(){ iniciarCaraCam(); }, reenter(){ iniciarCaraCam(); }},
 
 caraAjuste:{ html(){
@@ -1245,11 +1320,6 @@ caja:{ html(){
 }},
 
 /* ---------- Producto ---------- */
-modelos:{ html(){
-  const ms=[...S.modelos.values()].sort((a,b)=>(Number(b.actualizado)||0)-(Number(a.actualizado)||0));
-  return `${cabecera()}<h1 class="md">Modelos 3D</h1><p class="help" style="margin:6px 0 16px">Productos modelados en Rhino. Se insertan en los planos desde el sistema integral, en Stock diseño.</p>
-  ${ms.length?`<div class="mod-grid">${ms.map(tarjetaModelo).join('')}</div>`:`<div class="empty"><b>Todavía no hay modelos</b></div>`}`;
-}},
 modelo:{ html(){
   const c=V.p.codigo, m=S.modelos.get(c); if(!m) return `${cabecera()}<div class="empty"><b>No encontré ese modelo</b></div>`;
   const p=S.productos.get(c); const dims=[m.alto,m.ancho,m.prof].filter(Boolean);
@@ -1259,6 +1329,7 @@ modelo:{ html(){
   ${dims.length?`<div class="medidas"><span>Medidas</span><b>${esc(dims.join(' × '))} mm</b></div>`:''}
   ${m.archivo?`<div class="ruta"><span>En el servidor</span><code>${esc(m.archivo)}</code><button class="link acc" style="padding:0;align-self:flex-start" data-act="copiarRuta" data-ruta="${esc(m.archivo)}">Copiar ruta</button></div>`:''}
   ${p?`<button class="mod-ir" data-go="producto" data-codigo="${esc(c)}">${ico('box',22)}<span><b>Muestra en el estudio</b>${totalDe(c)>0?unidades(totalDe(c)):'Ya no está en el estudio'}</span>${ico('chev',16)}</button>`:''}
+  <button type="button" class="link" style="color:var(--red);margin-top:18px;padding:0" data-act="borrarModeloApp">Eliminar modelo</button>
   <p class="foot">Código ${esc(c)}${m.por?' · Guardó '+esc(m.por):''}${cuando?' · '+cuando:''}</p>`;
 }, enter(){ requestAnimationFrame(()=>abrirVisor(S.modelos.get(V.p.codigo)||{})); }},
 producto:{ html(){
@@ -1267,14 +1338,14 @@ producto:{ html(){
   const dims=[p.alto,p.ancho,p.prof].filter(Boolean);
   const meta=[p.marca&&`<span>${esc(p.marca)}</span>`].filter(Boolean).join('');
   const hist=V.f.hist;
-  return `${cabecera(iconBtn(`data-go="ingreso" data-codigo="${esc(c)}" data-editar="1"`,'edit','Editar producto'))}
+  return `${cabecera(iconBtn(`data-go="ingreso" data-codigo="${esc(c)}" data-editar="1"`,'edit','Editar producto'))}<div class="ficha"><div class="f-a">
   ${p.foto?`<div class="photo"><img src="${fotoUrl(p.foto)}" alt="Foto de ${esc(p.nombre)}"></div>`:''}
   <h1 class="md" style="margin-top:${p.foto?'18px':'4px'}">${esc(p.nombre)}</h1>
   ${meta?`<div class="meta">${meta}</div>`:''}
   ${totalDe(c)>0&&faltaDe(p).length?`<button class="falta" data-go="ingreso" data-codigo="${esc(c)}" data-editar="1">${ico('cam',18,'stroke:var(--acc-ink);stroke-width:2')}<span><b>${textoFalta(faltaDe(p))}</b>Completá la ficha</span>${ico('chev',16,'stroke:var(--acc-ink)')}</button>`:''}
   ${fichaChips(p.nombre).length?`<div class="meta" style="margin-top:6px" title="Leído del nombre del producto">${fichaChips(p.nombre).map(x=>`<span style="background:#fff;border:1.5px solid #e8e8e8">${esc(x)}</span>`).join('')}</div>`:''}
   ${!st.length&&!S.prestamos.some(x=>x.codigo===c)?`<div class="aviso-hist" role="note">${ico('box',20,'stroke:var(--acc-ink);stroke-width:2')}<span><b>Ya no está en el estudio</b>${salidaDe(c)?esc(textoSalida(c))+' ':''}La ficha queda para consultar fotos y medidas.</span></div>`:''}
-  <div class="dark"${!st.length&&!S.prestamos.some(x=>x.codigo===c)?' hidden':''}><div class="between"><b style="font-size:17px">Dónde está</b><span style="font-size:13px;color:var(--on-dark)">${unidades(tot)}</span></div>
+  </div><div class="f-b"><div class="dark"${!st.length&&!S.prestamos.some(x=>x.codigo===c)?' hidden':''}><div class="between"><b style="font-size:17px">Dónde está</b><span style="font-size:13px;color:var(--on-dark)">${unidades(tot)}</span></div>
   ${st.length?`<div class="list">${st.map((s,i)=>`<button class="item" data-go="caja" data-id="${esc(s.caja)}"><span style="position:relative;flex:none;width:36px;height:36px">${shape(i===0?GALLETA:SOL,36,'#a35e47')}<svg class="ico" width="16" height="16" viewBox="0 0 24 24" style="position:absolute;left:10px;top:10px;stroke:#fff;stroke-width:2.4"><path d="${I.box}"/></svg></span><span class="tx"><b>${esc(cajaNom(s.caja))}</b><span>${esc(S.cajas.get(s.caja)?.lugar||'')}</span></span><b style="font-size:20px;font-weight:900;font-stretch:125%">${s.cant}</b></button>`).join('')}</div>`
    :`<p style="margin:10px 0 0;color:var(--on-dark)">${S.prestamos.some(x=>x.codigo===c)?'No queda nada guardado.':esc(textoSalida(c))}</p>`}
   ${S.prestamos.filter(x=>x.codigo===c).map(x=>`<button class="item" data-go="devolver" data-id="${esc(x.id)}" style="margin-top:6px"><span style="flex:none;width:36px;height:36px;border-radius:999px;background:#3a3a3a;display:flex;align-items:center;justify-content:center">${ico('user',18,'stroke:#fff')}</span><span class="tx"><b>Prestada a ${esc(x.a)}</b><span${vencido(x)?' style="color:var(--red-soft)"':''}>${x.hasta?`${vencido(x)?'Venció':'Vuelve'} el ${esc(fechaCorta(x.hasta))}`:'Sin fecha'}</span></span><b style="font-size:20px;font-weight:900;font-stretch:125%">${x.cant}</b></button>`).join('')}</div>
@@ -1285,7 +1356,7 @@ producto:{ html(){
   ${S.modelos.has(c)?bloqueModelo(S.modelos.get(c)):''}
   <div class="sec"><h2>Historial</h2></div>
   ${hist?(hist.length?`<ol class="feed">${hist.map(textoMov).join('')}</ol>`:`<p class="help">Sin movimientos.</p>`):`<p class="help">Cargando…</p>`}
-  <p class="foot">${c.startsWith('MU-')?'Código interno':'Código'} ${esc(c)}${c.startsWith('MU-')?` · <button class="link acc" style="padding:0;font-size:12.5px" data-go="etiqueta" data-codigo="${esc(c)}">Etiqueta</button>`:''}</p>${V.f.hoja?hojaAccion(c):''}`;
+  </div></div><p class="foot">${c.startsWith('MU-')?'Código interno':'Código'} ${esc(c)}${c.startsWith('MU-')?` · <button class="link acc" style="padding:0;font-size:12.5px" data-go="etiqueta" data-codigo="${esc(c)}">Etiqueta</button>`:''}</p>${V.f.hoja?hojaAccion(c):''}`;
 }, enter(){ cargarHist(); }, reenter(){ cargarHist(); }},
 
 /* ---------- Producto nuevo / editar ---------- */
@@ -1725,8 +1796,6 @@ function resultados(){
     h+=`<div class="empty" style="margin-top:14px"><b style="font-size:40px;line-height:1">No hay.</b><p>${sinStock.length?'Lo tuvimos: su ficha sigue abajo, en Historial.':'No encontré muestras con esas palabras. Probá con la marca sola.'}</p></div>`;
   }
   if(sinStock.length) h+=`<div class="sec"><h2>Historial</h2><span class="m">Ya no están en el estudio</span></div><div class="grp">${sinStock.map(filaHist).join('')}</div>`;
-  const mods=[...S.modelos.values()].filter(m=>ws.every(w=>norm([m.nombre,m.marca,m.codigo].join(' ')).includes(w)));
-  if(mods.length) h+=`<div class="sec"><h2>Modelos 3D</h2></div><div class="mod-grid">${mods.map(tarjetaModelo).join('')}</div>`;
   if(cajas.length) h+=`<div class="sec"><h2>Cajas</h2></div><div class="list">${cajas.map(c=>`<button class="item" data-go="caja" data-id="${esc(c.id)}"><span class="ic ic-caja">${cubo(34,20,26)}</span><span class="tx"><b>${esc(c.nombre)}</b><span>${esc(c.lugar||'')}</span></span></button>`).join('')}</div>`;
   return h;
 }
@@ -1771,6 +1840,15 @@ async function cargarHist(){
 
 /* ============ Guardados ============ */
 const ACCIONES={
+  pcIr(a){ const k=a.dataset.v; salir(); pila.length=0; V={view:'inicio',p:{},f:{}}; if(k==='inicio'){ render(); window.scrollTo(0,0); } else go(k,{}); },
+  reintentarVisor(){ abrirVisor(S.modelos.get(V.p.codigo)||{}); },
+  borrarModeloApp(){ const c=V.p.codigo, m=S.modelos.get(c)||{}; V.f._borrarModelo=c;
+    overlay(`<b style="font-size:22px">¿Eliminar el modelo 3D?</b><p style="margin:10px 0 0;color:var(--ink-2)">${esc(m.nombre||c)}: deja de verse en la app. En el servidor queda una copia, y en Rhino se elimina desde Stock diseño.</p>
+     <div class="btns" style="margin-top:18px"><button class="btn" data-act="cancelarBorrar">Cancelar</button><button class="btn" style="background:var(--red);color:#fff" data-act="confirmarBorrarModelo">Eliminar</button></div>`); },
+  async confirmarBorrarModelo(){ const c=V.f._borrarModelo; V.f._borrarModelo=null; if(!c){ overlay(null); return; }
+    overlay(spinner('Eliminando…'));
+    try{ await call('borrarModelo',c); S.modelos.delete(c); overlay(null); if(visorVivo){ visorVivo.dispose(); visorVivo=null; } back(); toast('Modelo eliminado de la app'); }
+    catch(e){ overlay(null); toast(/desconocida/.test(e.message)?'Actualizá el Apps Script para usar esto.':'No se pudo eliminar el modelo.'); } },
   carasEmpezar(){ const p=S.productos.get(V.p.codigo)||{}; const i=siguienteCara(p,-1); abrirCaras(i<0?0:i,false); },
   caraUna(a){ const i=CARAS.findIndex(x=>x.k===a.dataset.cara); if(i>=0) abrirCaras(i,true); },
   dispararCara(){ dispararCara(); },
@@ -2018,17 +2096,20 @@ function cargarMotor3D(){ if(window.Caja3D) return Promise.resolve();
     s.addEventListener('load',()=>ok()); s.addEventListener('error',()=>mal(new Error('No se pudo cargar el visor 3D'))); if(window.Caja3D) ok(); }); }
 async function abrirVisor(m){
   if(visorVivo){ visorVivo.dispose(); visorVivo=null; }
-  const cont=$('#visor'); if(!cont||!m.glb) return; const msg=cont.querySelector('p');
+  const cont=$('#visor'); if(!cont||!m.glb) return; const msg=cont.querySelector('p'); if(msg) msg.textContent='Cargando el modelo…';
+  const fallo=t=>{ if(msg&&$('#visor')===cont) msg.innerHTML=`${t}<br><button type="button" class="link acc" style="padding:0;margin-top:6px" data-act="reintentarVisor">Probar de nuevo</button>`; };
   try{
-    const [r]=await Promise.all([call('glbModelo',m.glb),cargarMotor3D()]);
-    if(!$('#visor')) return;
+    const tope=new Promise((_,mal)=>setTimeout(()=>mal(new Error('tarde')),45000));
+    const [r]=await Promise.race([Promise.all([call('glbModelo',m.glb),cargarMotor3D()]),tope]);
+    if($('#visor')!==cont) return;
     const bin=Uint8Array.from(atob(r.b64),ch=>ch.charCodeAt(0)).buffer;
-    visorVivo=Caja3D.visor(cont.querySelector('canvas'),bin,{onLoad:()=>{ if(msg) msg.remove(); },onError:()=>{ if(msg) msg.textContent='No se pudo abrir el modelo.'; }});
-  }catch(e){ if(msg) msg.textContent='No se pudo abrir el modelo.'; }
+    // Modelos con la gráfica de la muestra: sin tono de cine ni entorno fuerte, así los colores no se lavan.
+    visorVivo=Caja3D.visor(cont.querySelector('canvas'),bin,{tono:0,entorno:.6,luz:.35,onLoad:()=>{ if(msg) msg.remove(); },onError:()=>fallo('No se pudo abrir el modelo.')});
+  }catch(e){ fallo(e&&e.message==='tarde'?'El modelo tarda demasiado. Si es viejo, volvé a guardarlo desde Rhino.':'No se pudo abrir el modelo.'); }
 }
 // ===== Cajas 3D =====
 let C3D=null, c3dEstado='nada', c3dIdx=0, c3dFirma='', c3dVolviendo=false, c3dGL=null;
-function usar3d(){ if(RM||c3dEstado==='error') return false;
+function usar3d(){ if(RM||PC||c3dEstado==='error') return false;  // en la compu, las cajas en grilla
   if(c3dGL==null){ try{ const c=document.createElement('canvas'); c3dGL=!!(c.getContext('webgl2')||c.getContext('webgl')); }catch(e){ c3dGL=false; } }
   return c3dGL; }
 const uniCaja=id=>stockEn(id).reduce((a,s)=>a+s.cant,0);
@@ -2134,6 +2215,7 @@ function render(){
   c3dSync();
   if(visorVivo&&!$('#visor')){ visorVivo.dispose(); visorVivo=null; }
   $('#nav').hidden=true;
+  const pb=$('#pcbar'); if(pb){ pb.hidden=!PC; pb.innerHTML=PC?barraPC():''; }
   const osc=V.view==='mov'&&V.f.tipo==='ingresar'; document.body.classList.toggle('escaneo',osc);
   const tc=document.querySelector('meta[name="theme-color"]'); if(tc) tc.content=osc?'#000000':'#ffffff';
 }

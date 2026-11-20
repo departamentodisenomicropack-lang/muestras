@@ -168,3 +168,17 @@ Un solo sistema de movimiento, sin librerías (módulo "Motion" en index.html):
 - Después de la foto se ajustan las 4 esquinas y la app endereza la cara (homografía, corrige la perspectiva) y la deja a la proporción exacta: lado largo 1400 px, JPEG.
 - Backend: columnas fotoFrente, fotoDerecha, fotoIzquierda, fotoDorso, fotoArriba, fotoAbajo al final de Productos (las hojas viejas suman los títulos solas) y `subirCara(codigo, cara, base64)`.
 - Orientación de cada foto (Rhino la usa así): frente y dorso con el producto parado; laterales = su lado derecho / izquierdo mirándolo de frente, parado; arriba = visto desde arriba con el frente hacia abajo de la foto; abajo = la base, inclinándolo hacia atrás, con el frente hacia arriba de la foto. Ancho × alto en mm de cada foto: frente y dorso ancho × alto; laterales prof × alto; arriba y abajo ancho × prof.
+
+### Versión para la compu (20/11/2026)
+- Misma app y mismo link. Con pantalla de 900 px o más y mouse (`(min-width:900px) and (hover:hover) and (pointer:fine)`) se pone la clase `compu` en `<html>` (ojo: `.pc` ya era otra cosa, la tarjeta "Por completar").
+- Como Brief POP en PC: barra arriba (76 px) con el logo, las secciones Inicio · Productos · Por completar · Actividad (la elegida en acc-soft / acc-ink), el botón negro **Agregar producto** y el usuario con su galleta. Contenido de hasta 1180 px con 64 px de margen.
+- Inicio: el saludo grande; las cajas en grilla (en la compu no va el carrusel 3D). Ficha del producto en dos columnas: foto y datos a la izquierda (fija al bajar), dónde está, acciones, fotos para el modelo (las 6 en una fila), modelo e historial a la derecha.
+- Pistola de códigos USB o tipeo fuera de un campo: dígitos + Enter abren el producto (o lo suman, en Agregar producto). En Agregar producto hay además un campo "Código de barras + Enter". En el buscador, un código de 8 a 14 dígitos + Enter también abre el producto (en el celular también). "/" va al buscador.
+- Fotos para el modelo: en la compu se elige el archivo o se arrastra la foto sobre la cámara.
+- Instalada en la compu, abre ocupando toda la pantalla (mismo truco que el envoltorio de Brief POP).
+
+### Modelos 3D (20/11/2026)
+- Ya no están en el inicio ni en la búsqueda: el modelo se ve solo desde la ficha del producto (bloque "Modelo 3D").
+- En la vista del modelo: **Eliminar modelo** (confirma; llama `borrarModelo`, saca la fila; en el servidor queda la copia; en Rhino se elimina desde Stock diseño).
+- Visor: tope de 45 s con mensaje y "Probar de nuevo". Para modelos con la gráfica de la muestra: sin tono de cine (`tono:0`), entorno .6 y luz .35, y los materiales con textura van sin metal y sin color encima, así la foto se ve con sus colores. Cambio hecho en `vendor/cajas3d-src/visor.js` y parcheado igual en el `vendor/caja3d.js` armado.
+- Al terminar las caras: "Listo. Ahora en Rhino: Stock diseño → Importar muestra". La ficha dice si falta importarla o si el modelo ya está.
