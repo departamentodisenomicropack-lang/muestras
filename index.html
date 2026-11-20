@@ -580,6 +580,7 @@ html.compu .cam.soltar{outline:3px dashed var(--acc);outline-offset:4px}
 html.compu .visor{max-width:720px}
 
 html.compu .cajas-top{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px 20px}
+html.compu .c3d-stage{max-width:600px;margin:0 auto}
 @media (prefers-reduced-motion:reduce){.roll .rc,.cam .marco{transition:none}#app.vista-entra>*{animation:none}.tm.in,.tm.out{animation:none}}
 </style>
 </head>
@@ -606,7 +607,7 @@ html.compu .cajas-top{display:grid;grid-template-columns:repeat(auto-fill,minmax
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611200951';
+const APP_VERSION='202611200954';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -974,6 +975,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&el&&el.id==='codMov'){ e.preventDefault(); const t=el.value.trim(); el.value=''; if(t) codigoEnMov(t); return; }
   if(e.key==='Enter'&&el&&el.id==='q'&&/^\d{8,14}$/.test(el.value.trim())){ e.preventDefault(); const t=el.value.trim(); V.f.q=''; el.value=''; manejarCodigo(t); return; }
   if(!PC||campo||e.ctrlKey||e.metaKey||e.altKey) return;
+  if((e.key==='ArrowLeft'||e.key==='ArrowRight')&&V.view==='inicio'&&C3D&&$('#c3dStage')){ e.preventDefault(); C3D.go(c3dIdx+(e.key==='ArrowRight'?1:-1)); return; }
   if(e.key==='/'){ e.preventDefault(); if(V.view!=='inicio'){ salir(); pila.length=0; V={view:'inicio',p:{},f:{}}; render(); } const q=$('#q'); if(q) q.focus(); return; }
   const ahora=e.timeStamp||performance.now(); if(ahora-teclas.at>1000) teclas.t=''; teclas.at=ahora;  // pistola o tipeado a mano, fuera de un campo
   if(e.key==='Enter'){ const t=teclas.t; teclas.t=''; if(t.length>=6){ e.preventDefault(); if(V.view==='mov') codigoEnMov(t); else manejarCodigo(t); } return; }
@@ -2125,12 +2127,12 @@ async function abrirVisor(m){
 }
 // ===== Cajas 3D =====
 let C3D=null, c3dEstado='nada', c3dIdx=0, c3dFirma='', c3dVolviendo=false, c3dGL=null;
-function usar3d(){ if(RM||PC||c3dEstado==='error') return false;  // en la compu, las cajas en grilla
+function usar3d(){ if(RM||c3dEstado==='error') return false;
   if(c3dGL==null){ try{ const c=document.createElement('canvas'); c3dGL=!!(c.getContext('webgl2')||c.getContext('webgl')); }catch(e){ c3dGL=false; } }
   return c3dGL; }
 const uniCaja=id=>stockEn(id).reduce((a,s)=>a+s.cant,0);
 function c3dPie(cs){ const i=Math.min(c3dIdx,cs.length-1);
-  return `<p>Deslizá para cambiar de caja. Tocá una para abrirla.</p>${cs.length>1?`<div class="c3d-pts">${cs.map((c,k)=>`<button type="button" data-c3d="${k}" aria-label="${esc(c.nombre)}" aria-current="${k===i}"><i></i></button>`).join('')}</div>`:''}`; }
+  return `<p>${PC?'Arrastrá o usá las flechas para cambiar de caja. Hacé clic en una para abrirla.':'Deslizá para cambiar de caja. Tocá una para abrirla.'}</p>${cs.length>1?`<div class="c3d-pts">${cs.map((c,k)=>`<button type="button" data-c3d="${k}" aria-label="${esc(c.nombre)}" aria-current="${k===i}"><i></i></button>`).join('')}</div>`:''}`; }
 function cargarC3D(){ if(c3dEstado!=='nada') return; c3dEstado='cargando';
   cargarMotor3D().then(()=>{ const f=document.fonts&&document.fonts.load?Promise.all([document.fonts.load('900 60px Archivo'),document.fonts.load('600 30px Archivo')]):Promise.resolve();
     f.catch(()=>{}).then(()=>{ c3dEstado='listo'; c3dSync(); });
