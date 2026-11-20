@@ -606,7 +606,7 @@ html.compu .cajas-top{display:grid;grid-template-columns:repeat(auto-fill,minmax
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611200936';
+const APP_VERSION='202611200939';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -704,7 +704,7 @@ const lsSet=(k,v)=>{ try{ localStorage.setItem(k,v); }catch(e){} };
 let miNombre=lsGet('muestras-nombre')||'';
 // Link personal (como Brief POP): ?yo=Nombre deja el nombre guardado en este celular. El parámetro queda en la dirección para que el ícono agregado a la pantalla de inicio lo conserve.
 try{ const yo=(new URLSearchParams(location.search).get('yo')||'').trim().slice(0,40); if(yo){ miNombre=yo; lsSet('muestras-nombre',yo); } }catch(e){}
-const fotoUrl=id=>'https://drive.google.com/thumbnail?id='+encodeURIComponent(id)+'&sz=w800';
+const fotoUrl=(id,w=800)=>'https://drive.google.com/thumbnail?id='+encodeURIComponent(id)+'&sz=w'+w;
 
 /* ============ Consultas sobre los datos ============ */
 const cajasOrden=()=>[...S.cajas.entries()].map(([id,c])=>({id,...c})).sort((a,b)=>norm(a.nombre).localeCompare(norm(b.nombre),'es',{numeric:true}));
@@ -1014,7 +1014,7 @@ function redCaras(p,activa,W=150,H=112){ const m=medidasDe(p)||{a:60,h:90,d:30};
 function bloqueCaras(p){ const c=p.codigo, n=carasHechas(p);
   if(!n) return `<button type="button" class="mod-blq cara-blq" data-act="carasEmpezar" style="width:100%;border:0;font:inherit;color:inherit;text-align:left;cursor:pointer">${redCaras(p,'frente',44,34)}<div><b>Fotos para el modelo</b><small>Las 6 caras, para vestir el 3D</small></div>${ico('chev',16)}</button>`;
   return `<div class="sec"><h2>Fotos para el modelo</h2><span class="m">${n} de 6</span></div>
-  <div class="caras">${CARAS.map(x=>`<button type="button" class="cara-t${p[x.col]?'':' vacia'}" data-act="caraUna" data-cara="${x.k}" aria-label="${p[x.col]?'Repetir':'Sacar'} la foto: ${x.t}"><span class="im">${p[x.col]?`<img src="${fotoUrl(p[x.col])}" alt="" loading="lazy">`:ico('cam',20,'stroke:var(--ink-2)')}</span><small>${x.corto}</small></button>`).join('')}</div>
+  <div class="caras">${CARAS.map(x=>`<button type="button" class="cara-t${p[x.col]?'':' vacia'}" data-act="caraUna" data-cara="${x.k}" aria-label="${p[x.col]?'Repetir':'Sacar'} la foto: ${x.t}"><span class="im">${p[x.col]?`<img src="${fotoUrl(p[x.col],300)}" alt="" loading="lazy">`:ico('cam',20,'stroke:var(--ink-2)')}</span><small>${x.corto}</small></button>`).join('')}</div>
   ${n<6?`<button type="button" class="btn" style="width:100%;margin-top:10px" data-act="carasEmpezar">Sacar las que faltan</button>`:''}
   <p class="help" style="margin-top:10px">${S.modelos.has(c)?'Modelo 3D listo.':'Falta importarla en Rhino: Stock diseño → Importar muestra.'}</p>`; }
 // La siguiente cara sin foto después de i (o -1).
@@ -1074,11 +1074,12 @@ function homografia(d,s){ const A=[],b=[];
   for(let c=0;c<8;c++){ let p=c; for(let r=c+1;r<8;r++) if(Math.abs(A[r][c])>Math.abs(A[p][c])) p=r; [A[c],A[p]]=[A[p],A[c]]; [b[c],b[p]]=[b[p],b[c]];
     for(let r=0;r<8;r++){ if(r===c) continue; const f=A[r][c]/A[c][c]; if(!f) continue; for(let k=c;k<8;k++) A[r][k]-=f*A[c][k]; b[r]-=f*b[c]; } }
   return b.map((v,i)=>v/A[i][i]); }
-// Endereza la cara: corrige la perspectiva y la deja con la proporción real (lado largo 1400 px).
+// Endereza la cara: corrige la perspectiva y la deja con la proporción real (lado largo 1000 px:
+// se ve bien en el celular y en el monitor, y el arte del modelo pesa poco).
 async function enderezarCara(blob,quad,asp){
   const img=await abrirImagen(blob); const src=lienzo(img,2000,false); soltar(img);
   const sw=src.width, sh=src.height, sd=src.getContext('2d').getImageData(0,0,sw,sh).data;
-  const W=asp>=1?1400:Math.round(1400*asp), H=asp>=1?Math.round(1400/asp):1400;
+  const L=1000, W=asp>=1?L:Math.round(L*asp), H=asp>=1?Math.round(L/asp):L;
   const h=homografia([[0,0],[W,0],[W,H],[0,H]],quad.map(([x,y])=>[x*sw,y*sh]));
   const out=document.createElement('canvas'); out.width=W; out.height=H; const og=out.getContext('2d'); const od=og.createImageData(W,H), o=od.data;
   for(let v=0;v<H;v++){ const vv=v+.5; for(let u=0;u<W;u++){ const uu=u+.5, den=h[6]*uu+h[7]*vv+1;
@@ -1088,7 +1089,7 @@ async function enderezarCara(blob,quad,asp){
     for(let ch=0;ch<3;ch++) o[j+ch]=(sd[i00+ch]*(1-fx)+sd[i10+ch]*fx)*(1-fy)+(sd[i01+ch]*(1-fx)+sd[i11+ch]*fx)*fy;
     o[j+3]=255; } }
   src.width=src.height=0; og.putImageData(od,0,0);
-  const r=await new Promise(ok=>out.toBlob(ok,'image/jpeg',.86)); out.width=out.height=0; return r; }
+  const r=await new Promise(ok=>out.toBlob(ok,'image/jpeg',.8)); out.width=out.height=0; return r; }
 // Vuelve a la ficha sin pasar por la cámara.
 function volverAFicha(){ salir(); while(V.view==='caraAjuste'||V.view==='caraCam') V=pila.pop()||{view:'inicio',p:{},f:{}}; render(); window.scrollTo(0,0); if(VIEWS[V.view]&&VIEWS[V.view].reenter) VIEWS[V.view].reenter(); }
 // Después de guardar o saltear: la siguiente cara que falta, o la ficha.
@@ -1357,7 +1358,7 @@ producto:{ html(){
   <div class="sec"><h2>Historial</h2></div>
   ${hist?(hist.length?`<ol class="feed">${hist.map(textoMov).join('')}</ol>`:`<p class="help">Sin movimientos.</p>`):`<p class="help">Cargando…</p>`}
   </div></div><p class="foot">${c.startsWith('MU-')?'Código interno':'Código'} ${esc(c)}${c.startsWith('MU-')?` · <button class="link acc" style="padding:0;font-size:12.5px" data-go="etiqueta" data-codigo="${esc(c)}">Etiqueta</button>`:''}</p>${V.f.hoja?hojaAccion(c):''}`;
-}, enter(){ cargarHist(); }, reenter(){ cargarHist(); }},
+}, enter(){ cargarHist(); adelantarModelo(V.p.codigo); }, reenter(){ cargarHist(); }},
 
 /* ---------- Producto nuevo / editar ---------- */
 ingreso:{ html(){
@@ -2089,20 +2090,31 @@ function cajaArriba(c){ const u=stockEn(c.id).reduce((a,s)=>a+s.cant,0);
    <span class="tapa" aria-hidden="true"><span class="cara"><span class="nom">${esc(c.nombre)}</span><svg class="sello" viewBox="0 0 100 100"><path d="${GALLETA}" fill="#f6ece8"/></svg><span class="lug">${esc(c.lugar||'Sin lugar')}</span><span class="uni"><b>${roll('caja-'+c.id,u)}</b><span>${u===1?'unidad':'unidades'}</span></span></span><span class="reves"></span></span></button>`; }
 // ===== Modelos 3D =====
 function tarjetaModelo(m){ return `<button class="mod-card" data-go="modelo" data-codigo="${esc(m.codigo)}">${m.miniatura?`<img src="${fotoUrl(m.miniatura)}" alt="" loading="lazy">`:'<div class="ph"></div>'}<span><b>${esc(m.nombre||m.codigo)}</b><small>${esc(m.marca||'')}</small></span></button>`; }
-function bloqueModelo(m){ return `<button class="mod-blq" data-go="modelo" data-codigo="${esc(m.codigo)}" style="width:100%;border:0;font:inherit;color:inherit;text-align:left;cursor:pointer">${m.miniatura?`<img src="${fotoUrl(m.miniatura)}" alt="">`:''}<div><b>Modelo 3D</b><small>Listo para usar en los planos</small></div>${ico('chev',16)}</button>`; }
+function bloqueModelo(m){ return `<button class="mod-blq" data-go="modelo" data-codigo="${esc(m.codigo)}" style="width:100%;border:0;font:inherit;color:inherit;text-align:left;cursor:pointer">${m.miniatura?`<img src="${fotoUrl(m.miniatura,300)}" alt="">`:''}<div><b>Modelo 3D</b><small>Listo para usar en los planos</small></div>${ico('chev',16)}</button>`; }
 let visorVivo=null;
 function cargarMotor3D(){ if(window.Caja3D) return Promise.resolve();
   return new Promise((ok,mal)=>{ let s=document.querySelector('script[data-motor3d]'); if(!s){ s=document.createElement('script'); s.src='vendor/caja3d.js?v='+APP_VERSION; s.dataset.motor3d=1; document.head.appendChild(s); }
     s.addEventListener('load',()=>ok()); s.addEventListener('error',()=>mal(new Error('No se pudo cargar el visor 3D'))); if(window.Caja3D) ok(); }); }
+// El .glb se baja una sola vez: queda guardado en el aparato (el id cambia si se vuelve a guardar en Rhino).
+const glbMem=new Map();
+function traerGlb(id){ if(glbMem.has(id)) return glbMem.get(id);
+  const p=(async()=>{ const k=new URL('glb/'+encodeURIComponent(id),location.href).href;
+    try{ const c=await caches.open('mpk-glb'); const r=await c.match(k); if(r) return await r.arrayBuffer(); }catch(e){}
+    const d=await call('glbModelo',id); const buf=Uint8Array.from(atob(d.b64),ch=>ch.charCodeAt(0)).buffer;
+    try{ const c=await caches.open('mpk-glb'); await c.put(k,new Response(buf.slice(0),{headers:{'Content-Type':'model/gltf-binary'}})); }catch(e){}
+    return buf; })();
+  glbMem.set(id,p); p.catch(()=>glbMem.delete(id)); return p; }
+// Al abrir la ficha de un producto con modelo, se va bajando el visor y el modelo mientras mirás.
+function adelantarModelo(c){ const m=S.modelos.get(c); if(!m||!m.glb) return; (window.requestIdleCallback||setTimeout)(()=>{ cargarMotor3D().catch(()=>{}); traerGlb(m.glb).catch(()=>{}); },{timeout:800}); }
 async function abrirVisor(m){
   if(visorVivo){ visorVivo.dispose(); visorVivo=null; }
   const cont=$('#visor'); if(!cont||!m.glb) return; const msg=cont.querySelector('p'); if(msg) msg.textContent='Cargando el modelo…';
   const fallo=t=>{ if(msg&&$('#visor')===cont) msg.innerHTML=`${t}<br><button type="button" class="link acc" style="padding:0;margin-top:6px" data-act="reintentarVisor">Probar de nuevo</button>`; };
   try{
     const tope=new Promise((_,mal)=>setTimeout(()=>mal(new Error('tarde')),45000));
-    const [r]=await Promise.race([Promise.all([call('glbModelo',m.glb),cargarMotor3D()]),tope]);
+    const [buf]=await Promise.race([Promise.all([traerGlb(m.glb),cargarMotor3D()]),tope]);
     if($('#visor')!==cont) return;
-    const bin=Uint8Array.from(atob(r.b64),ch=>ch.charCodeAt(0)).buffer;
+    const bin=buf.slice(0);
     // Modelos con la gráfica de la muestra: sin tono de cine ni entorno fuerte, así los colores no se lavan.
     visorVivo=Caja3D.visor(cont.querySelector('canvas'),bin,{tono:0,entorno:.6,luz:.35,onLoad:()=>{ if(msg) msg.remove(); },onError:()=>fallo('No se pudo abrir el modelo.')});
   }catch(e){ fallo(e&&e.message==='tarde'?'El modelo tarda demasiado. Si es viejo, volvé a guardarlo desde Rhino.':'No se pudo abrir el modelo.'); }
