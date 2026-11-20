@@ -606,7 +606,7 @@ html.compu .cajas-top{display:grid;grid-template-columns:repeat(auto-fill,minmax
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611200939';
+const APP_VERSION='202611200951';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -1551,11 +1551,14 @@ function wavPip(tonos){ const sr=22050; const tot=tonos.reduce((a,t)=>Math.max(a
   for(let i=0;i<n;i++){ const t=i/sr; let x=0; for(const [f,t0,d,vol] of tonos){ if(t>=t0&&t<t0+d){ const k=t-t0, env=Math.min(1,k/0.004,(d-k)/0.012); x+=vol*env*(Math.sin(2*Math.PI*f*k)>0?1:-1)*0.6+vol*env*0.4*Math.sin(2*Math.PI*f*k); } }
     v.setInt16(44+i*2,Math.max(-1,Math.min(1,x))*32767,true); }
   return URL.createObjectURL(new Blob([buf],{type:'audio/wav'})); }
-const SONIDOS={ ok:null, mal:null }; let sonidosListos=false;
+// Único sonido de la app: el pip al escanear un producto. Para que el celular deje sonarlo después
+// (sin que lo toque nadie), en el primer toque se "destraba" con un silencio: no se escucha nada.
+const SONIDOS={ ok:null }; let sonidosListos=false;
 function prepararSonidos(){ if(sonidosListos) return; sonidosListos=true;
   try{ if(navigator.audioSession) navigator.audioSession.type='playback'; }catch(e){}
-  try{ SONIDOS.ok=new Audio(wavPip([[2700,0,0.1,0.5]])); SONIDOS.mal=new Audio(wavPip([[440,0,0.12,0.45],[330,0.16,0.18,0.45]]));
-    for(const a of Object.values(SONIDOS)){ a.preload='auto'; a.muted=true; const pr=a.play(); if(pr) pr.then(()=>{ a.pause(); a.currentTime=0; a.muted=false; }).catch(()=>{ a.muted=false; sonidosListos=false; }); else a.muted=false; } }catch(e){ sonidosListos=false; } }
+  try{ const a=new Audio(wavPip([[2700,0,0.05,0]])); a.preload='auto'; SONIDOS.ok=a; const real=wavPip([[2700,0,0.1,0.5]]);
+    const pr=a.play(); const listo=()=>{ try{ a.pause(); }catch(e){} a.src=real; a.load(); };
+    if(pr) pr.then(listo).catch(()=>{ a.src=real; sonidosListos=false; }); else listo(); }catch(e){ sonidosListos=false; } }
 ['pointerdown','touchend','click'].forEach(ev=>document.addEventListener(ev,prepararSonidos,{passive:true,capture:true}));
 let hapticSw=null;
 function vibrar(patron){
@@ -1565,7 +1568,8 @@ function vibrar(patron){
     hapticSw.click(); }catch(e){}
 }
 function pip(mal){
-  const a=mal?SONIDOS.mal:SONIDOS.ok; if(a){ try{ a.currentTime=0; const pr=a.play(); if(pr) pr.catch(()=>{}); }catch(e){} }
+  // Los avisos de error solo vibran: el único sonido es el pip del escaneo.
+  if(!mal){ const a=SONIDOS.ok; if(a){ try{ a.currentTime=0; const pr=a.play(); if(pr) pr.catch(()=>{}); }catch(e){} } }
   vibrar(mal?[60,60,60]:50);
 }
 
