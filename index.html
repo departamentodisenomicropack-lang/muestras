@@ -606,7 +606,7 @@ html.compu .cajas-top{display:grid;grid-template-columns:repeat(auto-fill,minmax
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611200932';
+const APP_VERSION='202611200936';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -1352,8 +1352,8 @@ producto:{ html(){
   ${st.length?`<div class="acts3">${[['sacar','Sacar','out'],['mover','Mover','arrow'],['devolver','Devolver','user']].map(([k,l,ic])=>`<button class="accion" data-hoja="${k}"><span class="bub">${ico(ic,18,'stroke:#fff')}</span>${l}</button>`).join('')}</div>`:''}
   ${V.f.sumar?panelSumar(c):`<div style="display:flex;justify-content:center"><button type="button" class="link acc" data-act="abrirSumar">+ Agregar más unidades</button></div>`}
   ${dims.length||p.peso?`<div class="medidas"><span>Medidas</span><b>${dims.length?esc(dims.join(' × '))+' mm':''}${dims.length&&p.peso?' · ':''}${p.peso?esc(p.peso)+' g':''}</b></div>`:''}
-  ${bloqueCaras(p)}
   ${S.modelos.has(c)?bloqueModelo(S.modelos.get(c)):''}
+  ${bloqueCaras(p)}
   <div class="sec"><h2>Historial</h2></div>
   ${hist?(hist.length?`<ol class="feed">${hist.map(textoMov).join('')}</ol>`:`<p class="help">Sin movimientos.</p>`):`<p class="help">Cargando…</p>`}
   </div></div><p class="foot">${c.startsWith('MU-')?'Código interno':'Código'} ${esc(c)}${c.startsWith('MU-')?` · <button class="link acc" style="padding:0;font-size:12.5px" data-go="etiqueta" data-codigo="${esc(c)}">Etiqueta</button>`:''}</p>${V.f.hoja?hojaAccion(c):''}`;
