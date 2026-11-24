@@ -186,9 +186,9 @@ Un solo sistema de movimiento, sin librerías (módulo "Motion" en index.html):
 
 ### Versión para la compu según el boceto (24/11/2026)
 Manuel vio el boceto "MPK Diseño · Boceto de animaciones" (artboard 3 · Versión PC) y pidió aplicar solo eso; el celular no cambia.
-- Menú fijo a la izquierda (240 px, borde #dcdcdc): "MPK Diseño" arriba; Productos · Cajas · Movimientos · Clientes como pastillas (la activa negra con texto blanco); abajo, el usuario. Reemplaza la barra de arriba del 20/11.
+- Menú fijo a la izquierda (240 px, borde #dcdcdc): "MPK Diseño" arriba; Productos · Cajas · Movimientos como pastillas (la activa negra con texto blanco); abajo, el usuario. Reemplaza la barra de arriba del 20/11.
 - En la compu la app arranca en **Productos** (`pcProductos`): buscador pastilla gris "Buscar o leer con la pistola" con la tecla `/` + botón negro "Agregar producto"; tabla en caja gris de radio 20 (Producto · Marca · Caja · Modelo 3D [Listo / N de 6 caras / Sin fotos] · Uds. en cifra ancha); fila hover #e8e8e8, elegida en blanco. Sin buscar muestra lo que está en el estudio; al buscar, todo.
 - Ficha a la derecha en panel gris de radio 28, sin cambiar de pantalla: marca · código, nombre, visor 3D (o la foto) en caja blanca de 220 px, Medidas y Está en, Mover (negro), Sacar (gris) y "Ficha completa". Entra desde la derecha: translateX 48 px → 0 en 420 ms cubic-bezier(.2,0,0,1), opacidad 220 ms. Botones a 0,98 al apretar (120 ms). Todo quieto con prefers-reduced-motion.
 - Ventana angosta: la ficha baja debajo de la tabla; la tabla tiene scroll horizontal en su caja.
-- Cajas = el inicio con el carrusel 3D; Movimientos = Actividad; Clientes (`pcClientes`) = tarjetas por cliente que filtran la tabla.
+- Cajas = el inicio con el carrusel 3D; Movimientos = Actividad. Clientes se sacó (Manuel 24/11: "es lo mismo que cajas").
 - Pistola o código + Enter en la tabla: elige la fila del producto (si no existe, lo da de alta como siempre).

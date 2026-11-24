@@ -645,7 +645,7 @@ html.compu .c3d-stage{max-width:600px;margin:0 auto}
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611241456';
+const APP_VERSION='202611241500';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -1000,7 +1000,7 @@ const mqPC=matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)
 let PC=mqPC.matches; document.documentElement.classList.toggle('compu',PC);
 (mqPC.addEventListener?mqPC.addEventListener.bind(mqPC,'change'):mqPC.addListener.bind(mqPC))(e=>{ PC=e.matches; document.documentElement.classList.toggle('compu',PC); if(!PC&&/^pc/.test(V.view)){ pila.length=0; V={view:'inicio',p:{},f:{}}; } if(typeof render==='function'){ render(); if(V.view==='pcProductos') pcMontar(); } });
 function barraPC(){
-  const sec=[['pcProductos','Productos'],['inicio','Cajas'],['actividad','Movimientos'],['pcClientes','Clientes']];
+  const sec=[['pcProductos','Productos'],['inicio','Cajas'],['actividad','Movimientos']];
   const raiz=pila.length?pila[0].view:V.view, ini=(miNombre||'').trim().charAt(0).toUpperCase();
   return `<p class="pc-marca">MPK Diseño</p><nav aria-label="Secciones">${sec.map(([k,l])=>`<button type="button" data-act="pcIr" data-v="${k}"${raiz===k?' aria-current="page"':''}>${l}</button>`).join('')}</nav>
   ${miNombre?`<button type="button" class="yo" data-act="cambiarNombre" aria-label="${esc(miNombre)}: cambiar de usuario"><span class="av">${shape(GALLETA,36,'#a35e47')}<b>${esc(ini)}</b></span><span><b>${esc(miNombre)}</b><small>Cambiar de usuario</small></span></button>`:''}`; }
@@ -1296,13 +1296,6 @@ pcProductos:{ html(){ const f=V.f;
    <div class="pc-tabla"><div class="pc-in" role="list"><div class="pc-th"><span>Producto</span><span>Marca</span><span>Caja</span><span>Modelo 3D</span><span>Uds.</span></div><div id="pcFilas" style="display:flex;flex-direction:column;gap:4px">${pcFilas()}</div></div></div>
   </section><aside class="pc-ficha" id="pcFicha" aria-live="polite"></aside></div>`;
 }, enter(){ pcMontar(); }, reenter(){ pcMontar(); }},
-
-pcClientes:{ html(){
-  const cls=clientes().sort((a,b)=>a.localeCompare(b,'es'));
-  const datos=cl=>{ const k=norm(cl); const cs=[...S.productos.keys()].filter(c=>totalDe(c)>0&&(norm((S.productos.get(c)||{}).cliente||'')===k||stockDe(c).some(s=>norm(cajaNom(s.caja)).startsWith(k+' - '))));
-    return {n:cs.length,u:cs.reduce((a,c)=>a+totalDe(c),0)}; };
-  return `<h1 class="md">Clientes</h1>${cls.length?`<div class="pc-clis">${cls.map(cl=>{ const d=datos(cl); return `<button type="button" class="tap pc-cli" data-act="pcCliente" data-cli="${esc(cl)}"><b>${esc(cl)}</b><span>${d.n} ${d.n===1?'producto':'productos'} · ${unidades(d.u)}</span></button>`; }).join('')}</div>`:`<div class="empty"><b>Todavía no hay clientes</b><p>Salen del cliente de cada producto y del nombre de las cajas.</p></div>`}`;
-}},
 
 productos:{ html(){
   const f=V.f; f.filtro=f.filtro||'estudio';
@@ -1928,7 +1921,6 @@ async function cargarHist(){
 const ACCIONES={
   pcIr(a){ const k=a.dataset.v; salir(); pila.length=0; V={view:k,p:{},f:{}}; render(); window.scrollTo(0,0); const v=VIEWS[k]; if(v&&v.enter) v.enter(); },
   pcElegir(a){ pcElegir(a.dataset.codigo); },
-  pcCliente(a){ salir(); pila.length=0; V={view:'pcProductos',p:{},f:{cli:a.dataset.cli}}; render(); window.scrollTo(0,0); pcMontar(); },
   pcSinCliente(){ V.f.cli=''; V.f.sel=''; render(); pcMontar(); },
   reintentarVisor(){ abrirVisor(S.modelos.get(V.p.codigo)||{}); },
   borrarModeloApp(){ const c=V.p.codigo, m=S.modelos.get(c)||{}; V.f._borrarModelo=c;
