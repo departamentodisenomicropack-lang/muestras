@@ -183,3 +183,12 @@ Un solo sistema de movimiento, sin librerías (módulo "Motion" en index.html):
 - Visor: tope de 45 s con mensaje y "Probar de nuevo". Para modelos con la gráfica de la muestra: sin tono de cine (`tono:0`), entorno .6 y luz .35, y los materiales con textura van sin metal y sin color encima, así la foto se ve con sus colores. Cambio hecho en `vendor/cajas3d-src/visor.js` y parcheado igual en el `vendor/caja3d.js` armado.
 - Al terminar las caras: "Listo. Ahora en Rhino: Stock diseño → Importar muestra". La ficha dice si falta importarla o si el modelo ya está.
 - 20/11: fotos de las caras a 1000 px de lado largo y JPEG al 80 % (antes 1400 px / 86 %): alrededor de 35–150 KB por cara. Miniaturas de la ficha a 300 px. El .glb se baja una sola vez y queda guardado en el aparato (Cache Storage `mpk-glb`, por id de Drive), y se empieza a bajar al abrir la ficha del producto, junto con el visor.
+
+### Versión para la compu según el boceto (24/11/2026)
+Manuel vio el boceto "MPK Diseño · Boceto de animaciones" (artboard 3 · Versión PC) y pidió aplicar solo eso; el celular no cambia.
+- Menú fijo a la izquierda (240 px, borde #dcdcdc): "MPK Diseño" arriba; Productos · Cajas · Movimientos · Clientes como pastillas (la activa negra con texto blanco); abajo, el usuario. Reemplaza la barra de arriba del 20/11.
+- En la compu la app arranca en **Productos** (`pcProductos`): buscador pastilla gris "Buscar o leer con la pistola" con la tecla `/` + botón negro "Agregar producto"; tabla en caja gris de radio 20 (Producto · Marca · Caja · Modelo 3D [Listo / N de 6 caras / Sin fotos] · Uds. en cifra ancha); fila hover #e8e8e8, elegida en blanco. Sin buscar muestra lo que está en el estudio; al buscar, todo.
+- Ficha a la derecha en panel gris de radio 28, sin cambiar de pantalla: marca · código, nombre, visor 3D (o la foto) en caja blanca de 220 px, Medidas y Está en, Mover (negro), Sacar (gris) y "Ficha completa". Entra desde la derecha: translateX 48 px → 0 en 420 ms cubic-bezier(.2,0,0,1), opacidad 220 ms. Botones a 0,98 al apretar (120 ms). Todo quieto con prefers-reduced-motion.
+- Ventana angosta: la ficha baja debajo de la tabla; la tabla tiene scroll horizontal en su caja.
+- Cajas = el inicio con el carrusel 3D; Movimientos = Actividad; Clientes (`pcClientes`) = tarjetas por cliente que filtran la tabla.
+- Pistola o código + Enter en la tabla: elige la fila del producto (si no existe, lo da de alta como siempre).

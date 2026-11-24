@@ -546,32 +546,70 @@ body.escaneo .toast .tacc{background:rgb(0 0 0/.08);color:var(--acc-ink)}
 /* ===== Versión para la compu ===== */
 .pcbar{display:none}
 .ficha,.f-a,.f-b{display:contents}
-html.compu .pcbar{--paper:#fff;--fill:#f2f2f2;--fill-2:#e8e8e8;--ink:#000;--ink-2:#464646;--acc:#a35e47;--acc-ink:#8c4e3a;--acc-soft:#f6ece8;color:#000;position:sticky;top:0;z-index:20;height:76px;box-sizing:border-box;padding:0 40px;display:flex;align-items:center;gap:28px;border-bottom:1px solid var(--fill-2);background:#fff}
-html.compu .pcbar .logo{height:22px;width:auto;display:block}
-html.compu .pcbar nav{display:flex;gap:4px;flex:1}
-html.compu .pcbar nav button{height:44px;padding:0 16px;border-radius:22px;border:0;background:transparent;font:700 14.5px var(--f);color:var(--ink);display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:border-radius .45s var(--spring),background .2s}
-html.compu .pcbar nav button .ico{stroke:currentColor}
-html.compu .pcbar nav button:hover{background:var(--fill);border-radius:14px}
-html.compu .pcbar nav button[aria-current="page"]{background:var(--acc-soft);color:var(--acc-ink)}
-html.compu .pcbar .agregar{height:48px;padding:0 20px 0 6px;border-radius:999px;border:0;background:var(--ink);color:#fff;font:800 15px var(--f);display:flex;align-items:center;gap:10px;cursor:pointer;transition:transform .3s var(--spring)}
-html.compu .pcbar .agregar:active{transform:scale(.95)}
-html.compu .pcbar .agregar .shape{position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center}
-html.compu .pcbar .agregar .shape svg:first-child{position:absolute;inset:0}
-html.compu .pcbar .agregar .shape .ico{position:relative;stroke:#fff;stroke-width:2.4}
-html.compu .pcbar .yo{display:flex;align-items:center;gap:10px;border:0;background:none;padding:0;cursor:pointer;font:inherit;color:inherit}
-html.compu .pcbar .yo>span:first-child{display:flex;flex-direction:column;align-items:flex-end}
-html.compu .pcbar .yo b{font-size:14px;font-weight:800}
-html.compu .pcbar .yo small{font-size:12px;color:var(--ink-2)}
-html.compu .pcbar .av{position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center}
+html.compu .pcbar{--paper:#fff;--fill:#f2f2f2;--fill-2:#e8e8e8;--ink:#000;--ink-2:#464646;--acc:#a35e47;--acc-ink:#8c4e3a;--acc-soft:#f6ece8;color:#000;position:fixed;left:0;top:0;bottom:0;z-index:20;width:240px;box-sizing:border-box;padding:32px 20px;display:flex;flex-direction:column;gap:6px;border-right:1px solid #dcdcdc;background:#fff}
+html.compu .pcbar .pc-marca{margin:0 0 18px 8px;font-size:24px;font-weight:900;font-stretch:125%;line-height:1}
+html.compu .pcbar nav{display:flex;flex-direction:column;gap:6px}
+html.compu .pcbar nav button{display:flex;align-items:center;min-height:44px;padding:0 14px;border-radius:999px;border:0;background:transparent;color:#000;font:700 15px var(--f);text-align:left;cursor:pointer;transition:transform 120ms cubic-bezier(.2,0,0,1),background-color 120ms}
+html.compu .pcbar nav button:hover{background:#f2f2f2}
+html.compu .pcbar nav button[aria-current="page"]{background:#000;color:#fff}
+html.compu .pcbar .yo{margin-top:auto;display:flex;align-items:center;gap:10px;border:0;background:none;padding:6px 8px;border-radius:999px;cursor:pointer;font:inherit;color:inherit;text-align:left}
+html.compu .pcbar .yo:hover{background:#f2f2f2}
+html.compu .pcbar .yo b{display:block;font-size:14px;font-weight:800}
+html.compu .pcbar .yo small{font-size:12px;color:#464646}
+html.compu .pcbar .av{position:relative;width:36px;height:36px;flex:none;display:flex;align-items:center;justify-content:center}
 html.compu .pcbar .av svg{position:absolute;inset:0}
-html.compu .pcbar .av b{position:relative;color:#fff;font-size:16px;font-weight:900}
-html.compu .app{max-width:1180px;padding:36px 64px 120px}
-html.compu .hola-top,html.compu .fab-inicio{display:none}
+html.compu .pcbar .av b{position:relative;color:#fff;font-size:14px;font-weight:900}
+html.compu .tap{transition:transform 120ms cubic-bezier(.2,0,0,1),background-color 120ms}
+html.compu .tap:active,html.compu .pcbar nav button:active{transform:scale(.98)}
+html.compu .app{margin:0 0 0 240px;max-width:1180px;padding:36px 48px 120px;box-sizing:border-box}
+html.compu .app.ancho{max-width:none;padding:32px}
+.pcw{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.pc-lista{flex:3 1 420px;min-width:0;display:flex;flex-direction:column;gap:16px}
+.pc-top{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.pc-busca{flex:1 1 260px;display:flex;align-items:center;gap:10px;height:52px;padding:0 18px;border-radius:999px;background:#f2f2f2;box-sizing:border-box}
+.pc-busca input{flex:1;min-width:0;border:0;background:transparent;font:400 16px var(--f);color:#000;outline:none}
+.pc-busca input::placeholder{color:#6f6d6d}
+.pc-busca:focus-within{box-shadow:0 0 0 2px #000}
+.pc-busca kbd{font:inherit;font-size:13px;padding:2px 8px;border-radius:8px;background:#e8e8e8;color:#464646}
+.pc-agregar{height:52px;padding:0 22px;border-radius:999px;border:0;background:#000;color:#fff;font:700 15px var(--f);cursor:pointer}
+.pc-filtro{display:flex;align-items:center;gap:8px;font-size:14px}
+.pc-tabla{overflow-x:auto;border-radius:20px;background:#f2f2f2;padding:8px}
+.pc-in{min-width:560px;display:flex;flex-direction:column;gap:4px}
+.pc-th,.pc-row{display:grid;grid-template-columns:2.4fr 1fr 1.2fr 1fr .6fr;gap:12px;align-items:center}
+.pc-th{padding:10px 14px;font-size:13px;color:#464646;font-weight:700}
+.pc-row{padding:14px;border:0;border-radius:14px;background:transparent;font:inherit;font-size:15px;color:inherit;text-align:left;cursor:pointer;width:100%}
+.pc-row:hover{background:#e8e8e8}
+.pc-row.sel{background:#fff}
+.pc-row b:first-child,.pc-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc-row .mod{color:#464646}
+.pc-row .uds{font-weight:900;font-stretch:125%}
+.pc-vacio{padding:28px 14px;color:#464646;font-size:15px}
+.pc-ficha{flex:2 1 320px;min-width:0;position:sticky;top:32px;border-radius:28px;background:#f2f2f2;padding:24px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px;transform:translateX(48px);opacity:0;transition:transform 420ms cubic-bezier(.2,0,0,1),opacity 220ms cubic-bezier(.2,0,0,1)}
+.pc-ficha.on{transform:none;opacity:1}
+.pc-ficha .cod{margin:0;font-size:13px;color:#464646;font-weight:700}
+.pc-ficha h2{margin:4px 0 0;font-size:24px;font-weight:900;font-stretch:125%;line-height:1.1}
+.pc-ficha .visor{height:220px;margin:0;border-radius:20px;background:#fff}
+.pc-foto{height:220px;border-radius:20px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#6f6d6d;font-size:13px;font-weight:600}
+.pc-foto img{max-width:100%;max-height:100%;object-fit:contain}
+.pc-datos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.pc-datos div{background:#fff;border-radius:14px;padding:12px}
+.pc-datos span{font-size:13px;color:#464646}
+.pc-btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pc-btns .bt{height:48px;padding:0 18px;border-radius:999px;border:0;font:700 15px var(--f);cursor:pointer}
+.pc-btns .negro{background:#000;color:#fff}.pc-btns .gris{background:#e8e8e8;color:#000}
+.pc-btns .link{margin-left:auto}
+.pc-clis{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:18px}
+.pc-cli{border:0;border-radius:20px;background:#f2f2f2;padding:20px;text-align:left;font:inherit;color:inherit;cursor:pointer;display:flex;flex-direction:column;gap:6px}
+.pc-cli:hover{background:#e8e8e8}
+.pc-cli b{font-size:20px;font-weight:900;font-stretch:125%}
+.pc-cli span{font-size:13px;color:#464646}
+@media (prefers-reduced-motion:reduce){.pc-ficha,.tap,.pcbar nav button{transition:none!important}.pc-ficha{transform:none;opacity:1}}
+html.compu .hola-top{display:none}
 html.compu .hola{font-size:60px;line-height:.95}
 html.compu .hola-sub{font-size:17px}
 html.compu .ficha{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:48px;align-items:start}
 html.compu .f-a,html.compu .f-b{display:block;min-width:0}
-html.compu .f-a{position:sticky;top:112px}
+html.compu .f-a{position:sticky;top:32px}
 html.compu .f-b>.dark:first-child{margin-top:0}
 html.compu .caras{grid-template-columns:repeat(6,minmax(0,1fr))}
 html.compu .cam{max-width:560px;margin-left:auto;margin-right:auto}
@@ -607,7 +645,7 @@ html.compu .c3d-stage{max-width:600px;margin:0 auto}
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
-const APP_VERSION='202611200954';
+const APP_VERSION='202611241456';
 async function chequearVersion(){ try{ if(location.protocol==='file:') return; const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'}); const nueva=(await r.text()).trim();
   if(nueva&&nueva!==APP_VERSION){ const u=new URL(location.href); if(u.searchParams.get('v')===nueva) return; u.searchParams.set('v',nueva); location.replace(u.toString()); } }catch(e){} }
 chequearVersion();
@@ -915,7 +953,7 @@ function aplicar(d){
   S.salidas=d.salidas||{};
   S.modelos=new Map((d.modelos||[]).map(m=>[m.codigo,m]));
 }
-function refrescar(){ if(V.view==='mov'){ pintarMov(); return; } if(['ingreso','agregar','mover','nuevaCaja','escanear','camara','fotoCam','recorte','devolver','caraCam','caraAjuste'].includes(V.view)) return;
+function refrescar(){ if(V.view==='mov'){ pintarMov(); return; } if(V.view==='pcProductos'&&$('#pcFilas')){ const bn=$('#app>.banner'); if(bn||conexion==='sin'){ render(); pcMontar(); return; } $('#pcFilas').innerHTML=pcFilas(); if(!V.f.sel||!S.productos.has(V.f.sel)) pcMontar(); return; } if(['ingreso','agregar','mover','nuevaCaja','escanear','camara','fotoCam','recorte','devolver','caraCam','caraAjuste'].includes(V.view)) return;
   if(V.view==='inicio'&&document.activeElement&&document.activeElement.id==='q'){ const r=$('#res'); if(r) r.innerHTML=resultados(); return; }
   const y=window.scrollY; render(); window.scrollTo(0,y); if(V.view==='etiqueta') dibujarEtiqueta(); }
 /* ----- Pantalla de carga: retiene hasta que lleguen las muestras ----- */
@@ -960,28 +998,54 @@ async function achicarFoto(file){
    contenido ancho, ficha en dos columnas, pistola de códigos y fotos arrastradas. */
 const mqPC=matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)');
 let PC=mqPC.matches; document.documentElement.classList.toggle('compu',PC);
-(mqPC.addEventListener?mqPC.addEventListener.bind(mqPC,'change'):mqPC.addListener.bind(mqPC))(e=>{ PC=e.matches; document.documentElement.classList.toggle('compu',PC); if(typeof render==='function') render(); });
+(mqPC.addEventListener?mqPC.addEventListener.bind(mqPC,'change'):mqPC.addListener.bind(mqPC))(e=>{ PC=e.matches; document.documentElement.classList.toggle('compu',PC); if(!PC&&/^pc/.test(V.view)){ pila.length=0; V={view:'inicio',p:{},f:{}}; } if(typeof render==='function'){ render(); if(V.view==='pcProductos') pcMontar(); } });
 function barraPC(){
-  const sec=[['inicio','Inicio','home'],['productos','Productos','prod'],['porCompletar','Por completar','edit'],['actividad','Actividad','undo']];
-  const raiz=(pila[0]&&pila[0].view==='inicio'&&pila[1])?pila[1].view:V.view;
-  const ini=(miNombre||'').trim().charAt(0).toUpperCase();
-  return `<img class="logo" src="logo-micropack.svg" alt="Micropack Americas"><nav aria-label="Secciones">${sec.map(([k,l,i])=>`<button type="button" data-act="pcIr" data-v="${k}"${(V.view===k||raiz===k)?' aria-current="page"':''}>${ico(i,18)}${l}</button>`).join('')}</nav>
-  <button type="button" class="agregar" data-mov="ingresar"><span class="shape">${shape(GALLETA,36,'#a35e47')}<svg class="ico" width="18" height="18" viewBox="0 0 24 24"><path d="${I.scan}"/></svg></span>Agregar producto</button>
-  ${miNombre?`<button type="button" class="yo" data-act="cambiarNombre" aria-label="${esc(miNombre)}: cambiar de usuario"><span><b>${esc(miNombre)}</b><small>Diseño</small></span><span class="av">${shape(GALLETA,44,'#a35e47')}<b>${esc(ini)}</b></span></button>`:''}`; }
+  const sec=[['pcProductos','Productos'],['inicio','Cajas'],['actividad','Movimientos'],['pcClientes','Clientes']];
+  const raiz=pila.length?pila[0].view:V.view, ini=(miNombre||'').trim().charAt(0).toUpperCase();
+  return `<p class="pc-marca">MPK Diseño</p><nav aria-label="Secciones">${sec.map(([k,l])=>`<button type="button" data-act="pcIr" data-v="${k}"${raiz===k?' aria-current="page"':''}>${l}</button>`).join('')}</nav>
+  ${miNombre?`<button type="button" class="yo" data-act="cambiarNombre" aria-label="${esc(miNombre)}: cambiar de usuario"><span class="av">${shape(GALLETA,36,'#a35e47')}<b>${esc(ini)}</b></span><span><b>${esc(miNombre)}</b><small>Cambiar de usuario</small></span></button>`:''}`; }
+/* ----- Productos en la compu: tabla a la izquierda y la ficha a la derecha, sin cambiar de pantalla ----- */
+function pcCajas(c){ const st=stockDe(c).sort((a,b)=>b.cant-a.cant); return st.length?esc(cajaNom(st[0].caja))+(st.length>1?` +${st.length-1}`:''):''; }
+function pcModelo(c,p){ if(S.modelos.has(c)) return 'Listo'; const n=carasHechas(p); return n?`${n} de 6 caras`:'Sin fotos'; }
+function pcCodigos(){ const f=V.f, ws=norm(f.q||'').split(/\s+/).filter(Boolean);
+  let cs=[...S.productos.keys()];
+  if(f.cli){ const k=norm(f.cli); cs=cs.filter(c=>{ const p=S.productos.get(c)||{}; return norm(p.cliente||'')===k||stockDe(c).some(s=>norm(cajaNom(s.caja)).startsWith(k+' - ')); }); }
+  if(ws.length) cs=cs.filter(c=>{ const p=S.productos.get(c)||{}; const t=norm([p.nombre,p.marca,p.cliente,p.proyecto,c,...stockDe(c).map(s=>cajaNom(s.caja))].join(' ')); return ws.every(w=>t.includes(w)); });
+  else cs=cs.filter(c=>totalDe(c)>0);
+  return cs.sort((a,b)=>prodNom(a).localeCompare(prodNom(b),'es')); }
+function pcFilas(){ const cs=pcCodigos();
+  if(!cs.length) return `<p class="pc-vacio">${V.f.q?'No encontré nada con eso.':'No hay productos en el estudio.'}</p>`;
+  return cs.map(c=>{ const p=S.productos.get(c)||{}; return `<button type="button" class="tap pc-row${V.f.sel===c?' sel':''}" data-act="pcElegir" data-codigo="${esc(c)}" aria-pressed="${V.f.sel===c}"><b>${esc(prodNom(c))}</b><span>${esc(p.marca||'')}</span><span>${pcCajas(c)}</span><span class="mod">${pcModelo(c,p)}</span><span class="uds">${totalDe(c)}</span></button>`; }).join(''); }
+function pcFicha(){ const c=V.f.sel, p=c&&S.productos.get(c);
+  if(!p) return `<p class="cod">Ficha</p><h2>Elegí un producto</h2><div class="pc-foto">Tocá una fila de la tabla.</div>`;
+  const m=S.modelos.get(c), dims=[p.alto,p.ancho,p.prof].filter(Boolean), tot=totalDe(c);
+  return `<div><p class="cod">${esc([p.marca,c].filter(Boolean).join(' · '))}</p><h2>${esc(p.nombre||c)}</h2></div>
+  ${m&&m.glb?`<div class="visor" id="visor"><canvas></canvas><p>Cargando el modelo…</p></div>`:`<div class="pc-foto">${p.foto?`<img src="${fotoUrl(p.foto)}" alt="Foto de ${esc(p.nombre||c)}">`:'Sin modelo ni foto'}</div>`}
+  <div class="pc-datos"><div><span>Medidas</span><br><b>${dims.length?esc(dims.join(' × '))+' mm':'Faltan'}</b></div><div><span>Está en</span><br><b>${stockDe(c).length?stockDe(c).map(s=>esc(cajaNom(s.caja))).join(', '):'No está en el estudio'}</b></div></div>
+  <div class="pc-btns">${tot>0?`<button type="button" class="tap bt negro" data-mov="mover" data-codigo="${esc(c)}">Mover</button><button type="button" class="tap bt gris" data-mov="sacar" data-codigo="${esc(c)}">Sacar</button>`:''}<button type="button" class="link acc" data-go="producto" data-codigo="${esc(c)}">Ficha completa</button></div>`; }
+// Elegir una fila: la ficha entra desde la derecha (si no cambia de producto, no se anima).
+function pcElegir(c,animar=true){ const f=V.f; f.sel=c;
+  document.querySelectorAll('#pcFilas .pc-row').forEach(b=>{ const si=b.dataset.codigo===c; b.classList.toggle('sel',si); b.setAttribute('aria-pressed',si); });
+  const el=$('#pcFicha'); if(!el) return; el.innerHTML=pcFicha();
+  if(animar&&!RM){ el.classList.remove('on'); void el.offsetWidth; requestAnimationFrame(()=>el.classList.add('on')); } else el.classList.add('on');
+  const m=S.modelos.get(c); if(m&&m.glb) abrirVisor(m); }
+function pcMontar(){ const f=V.f; if(!f.sel||!S.productos.has(f.sel)){ const cs=pcCodigos(); f.sel=cs[0]||''; } pcElegir(f.sel,false); }
 // Pistola de códigos (USB): teclea rápido y termina en Enter. "/" va al buscador.
 let teclas={t:'',at:0};
 document.addEventListener('keydown',e=>{
   const el=document.activeElement, campo=el&&/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName);
   if(e.key==='Enter'&&el&&el.id==='codMov'){ e.preventDefault(); const t=el.value.trim(); el.value=''; if(t) codigoEnMov(t); return; }
+  if(e.key==='Enter'&&el&&el.id==='pq'){ e.preventDefault(); const t=el.value.trim(); if(!t) return; if(S.productos.has(t)){ el.value=''; V.f.q=''; $('#pcFilas').innerHTML=pcFilas(); pcElegir(t); } else if(/^\d{8,14}$/.test(t)){ el.value=''; V.f.q=''; manejarCodigo(t); } else { const cs=pcCodigos(); if(cs.length) pcElegir(cs[0]); } return; }
   if(e.key==='Enter'&&el&&el.id==='q'&&/^\d{8,14}$/.test(el.value.trim())){ e.preventDefault(); const t=el.value.trim(); V.f.q=''; el.value=''; manejarCodigo(t); return; }
   if(!PC||campo||e.ctrlKey||e.metaKey||e.altKey) return;
   if((e.key==='ArrowLeft'||e.key==='ArrowRight')&&V.view==='inicio'&&C3D&&$('#c3dStage')){ e.preventDefault(); C3D.go(c3dIdx+(e.key==='ArrowRight'?1:-1)); return; }
-  if(e.key==='/'){ e.preventDefault(); if(V.view!=='inicio'){ salir(); pila.length=0; V={view:'inicio',p:{},f:{}}; render(); } const q=$('#q'); if(q) q.focus(); return; }
+  if(e.key==='/'){ e.preventDefault(); if(V.view!=='pcProductos'){ salir(); pila.length=0; V={view:'pcProductos',p:{},f:{}}; render(); window.scrollTo(0,0); pcMontar(); } const q=$('#pq'); if(q) q.focus(); return; }
   const ahora=e.timeStamp||performance.now(); if(ahora-teclas.at>1000) teclas.t=''; teclas.at=ahora;  // pistola o tipeado a mano, fuera de un campo
-  if(e.key==='Enter'){ const t=teclas.t; teclas.t=''; if(t.length>=6){ e.preventDefault(); if(V.view==='mov') codigoEnMov(t); else manejarCodigo(t); } return; }
+  if(e.key==='Enter'){ const t=teclas.t; teclas.t=''; if(t.length>=6){ e.preventDefault(); if(V.view==='mov') codigoEnMov(t); else if(V.view==='pcProductos'&&S.productos.has(t)){ V.f.q=''; const q=$('#pq'); if(q) q.value=''; $('#pcFilas').innerHTML=pcFilas(); pcElegir(t); } else manejarCodigo(t); } return; }
   if(e.key.length===1) teclas.t+=e.key;
 });
 // Fotos de las caras: en la compu se pueden arrastrar.
+document.addEventListener('input',e=>{ if(e.target&&e.target.id==='pq'&&V.view==='pcProductos'){ V.f.q=e.target.value; const fl=$('#pcFilas'); if(fl) fl.innerHTML=pcFilas(); } });
 document.addEventListener('dragover',e=>{ if(V.view==='caraCam'){ e.preventDefault(); const b=$('#camBox'); if(b) b.classList.add('soltar'); } });
 document.addEventListener('dragleave',e=>{ if(!e.relatedTarget){ const b=$('#camBox'); if(b) b.classList.remove('soltar'); } });
 document.addEventListener('drop',e=>{ if(V.view!=='caraCam') return; e.preventDefault(); const b=$('#camBox'); if(b) b.classList.remove('soltar');
@@ -1225,6 +1289,21 @@ apartados:{ html(){
 }},
 
 /* ---------- Todos los productos (también los que ya no están: historial) ---------- */
+pcProductos:{ html(){ const f=V.f;
+  return `<div class="pcw"><section class="pc-lista">
+   <div class="pc-top"><label class="pc-busca" for="pq">${ico('search',20,'stroke:#000;flex:none')}<span class="sr">Buscar o leer con la pistola</span><input id="pq" type="search" autocomplete="off" value="${esc(f.q||'')}" placeholder="Buscar o leer con la pistola"><kbd>/</kbd></label><button type="button" class="tap pc-agregar" data-mov="ingresar">Agregar producto</button></div>
+   ${f.cli?`<div class="pc-filtro">Cliente: <b>${esc(f.cli)}</b><button type="button" class="link acc" data-act="pcSinCliente">Ver todos</button></div>`:''}
+   <div class="pc-tabla"><div class="pc-in" role="list"><div class="pc-th"><span>Producto</span><span>Marca</span><span>Caja</span><span>Modelo 3D</span><span>Uds.</span></div><div id="pcFilas" style="display:flex;flex-direction:column;gap:4px">${pcFilas()}</div></div></div>
+  </section><aside class="pc-ficha" id="pcFicha" aria-live="polite"></aside></div>`;
+}, enter(){ pcMontar(); }, reenter(){ pcMontar(); }},
+
+pcClientes:{ html(){
+  const cls=clientes().sort((a,b)=>a.localeCompare(b,'es'));
+  const datos=cl=>{ const k=norm(cl); const cs=[...S.productos.keys()].filter(c=>totalDe(c)>0&&(norm((S.productos.get(c)||{}).cliente||'')===k||stockDe(c).some(s=>norm(cajaNom(s.caja)).startsWith(k+' - '))));
+    return {n:cs.length,u:cs.reduce((a,c)=>a+totalDe(c),0)}; };
+  return `<h1 class="md">Clientes</h1>${cls.length?`<div class="pc-clis">${cls.map(cl=>{ const d=datos(cl); return `<button type="button" class="tap pc-cli" data-act="pcCliente" data-cli="${esc(cl)}"><b>${esc(cl)}</b><span>${d.n} ${d.n===1?'producto':'productos'} · ${unidades(d.u)}</span></button>`; }).join('')}</div>`:`<div class="empty"><b>Todavía no hay clientes</b><p>Salen del cliente de cada producto y del nombre de las cajas.</p></div>`}`;
+}},
+
 productos:{ html(){
   const f=V.f; f.filtro=f.filtro||'estudio';
   const todos=[...S.productos.keys()].sort((a,b)=>prodNom(a).localeCompare(prodNom(b),'es'));
@@ -1847,7 +1926,10 @@ async function cargarHist(){
 
 /* ============ Guardados ============ */
 const ACCIONES={
-  pcIr(a){ const k=a.dataset.v; salir(); pila.length=0; V={view:'inicio',p:{},f:{}}; if(k==='inicio'){ render(); window.scrollTo(0,0); } else go(k,{}); },
+  pcIr(a){ const k=a.dataset.v; salir(); pila.length=0; V={view:k,p:{},f:{}}; render(); window.scrollTo(0,0); const v=VIEWS[k]; if(v&&v.enter) v.enter(); },
+  pcElegir(a){ pcElegir(a.dataset.codigo); },
+  pcCliente(a){ salir(); pila.length=0; V={view:'pcProductos',p:{},f:{cli:a.dataset.cli}}; render(); window.scrollTo(0,0); pcMontar(); },
+  pcSinCliente(){ V.f.cli=''; V.f.sel=''; render(); pcMontar(); },
   reintentarVisor(){ abrirVisor(S.modelos.get(V.p.codigo)||{}); },
   borrarModeloApp(){ const c=V.p.codigo, m=S.modelos.get(c)||{}; V.f._borrarModelo=c;
     overlay(`<b style="font-size:22px">¿Eliminar el modelo 3D?</b><p style="margin:10px 0 0;color:var(--ink-2)">${esc(m.nombre||c)}: deja de verse en la app. En el servidor queda una copia, y en Rhino se elimina desde Stock diseño.</p>
@@ -2224,11 +2306,13 @@ function iniciarMazo(){
   // entrada: el mazo se acomoda desde atrás
   if(!RM&&!f._dfVisto){ f._dfVisto=1; const dest=p; p=dest+3; pintar(); vel=0; ir(dest); } else pintar(); }
 function render(){
+  if(PC&&!render._pc){ render._pc=1; if(V.view==='inicio'&&!pila.length) V={view:'pcProductos',p:{},f:{}}; }
   const v=VIEWS[V.view]||VIEWS.inicio; let banner='';
   if(conexion==='sin') banner=`<p class="banner err">No me pude conectar con la planilla. Revisá la conexión; reintento solo.</p>`;
   else if(conexion==='cargando'&&!S.cajas.size) banner=`<p class="banner">Cargando las muestras…</p>`;
   const flipPrev=vueloCapturar();
-  $('#app').innerHTML=banner+v.html();
+  $('#app').innerHTML=banner+v.html(); $('#app').classList.toggle('ancho',PC&&V.view==='pcProductos');
+  if(V.view==='pcProductos'){ const pf=$('#pcFicha'); if(pf&&!pf.innerHTML) requestAnimationFrame(()=>{ if(V.view==='pcProductos'&&$('#pcFicha')&&!$('#pcFicha').innerHTML) pcMontar(); }); }
   requestAnimationFrame(()=>{ if($('#df')) iniciarMazo(); vueloAnimar(flipPrev); animarRolls(); });
   c3dSync();
   if(visorVivo&&!$('#visor')){ visorVivo.dispose(); visorVivo=null; }
